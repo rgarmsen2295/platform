@@ -50,6 +50,7 @@ module.exports = React.createClass({
                             UserStore.setLastDomain(this.props.domain);
                             UserStore.setLastEmail(this.state.user.email);
                             UserStore.setCurrentUser(data);
+                            
                             if (this.props.hash > 0)
                                 localStorage.setItem(this.props.hash, JSON.stringify({wizard: "finished"}));
                             window.location.href = '/channels/town-square';
