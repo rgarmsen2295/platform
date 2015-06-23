@@ -15,6 +15,7 @@ module.exports = React.createClass({
                     <li className={this.props.activeTab == 'security' ? 'active' : ''}><a href="#" onClick={function(){self.updateTab("security");}}><i className="glyphicon glyphicon-lock"></i>Security</a></li>
                     <li className={this.props.activeTab == 'notifications' ? 'active' : ''}><a href="#" onClick={function(){self.updateTab("notifications");}}><i className="glyphicon glyphicon-exclamation-sign"></i>Notifications</a></li>
                     <li className={this.props.activeTab == 'appearance' ? 'active' : ''}><a href="#" onClick={function(){self.updateTab("appearance");}}><i className="glyphicon glyphicon-wrench"></i>Appearance</a></li>
+                    <li className={this.props.activeTab == 'admin' ? 'active' : ''}><a href="#" onClick={function(){self.updateTab("admin");}}><i className="glyphicon glyphicon-cog"></i>Admin Settings</a></li>
                 </ul>
             </div>
         );

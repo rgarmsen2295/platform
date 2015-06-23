@@ -64,6 +64,11 @@ var NavbarDropdown = React.createClass({
                     <a href="#" data-toggle="modal" data-target="#team_members">Manage Team</a>
                 </li>
             );
+            default_link = (
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#default_channels">Manage Default Channels</a>
+                </li>
+            );
             rename_link = (
                 <li>
                     <a href="#" data-toggle="modal" data-target="#rename_team_link">Rename</a>

@@ -27,6 +27,7 @@ type Channel struct {
 	Description   string `json:"description"`
 	LastPostAt    int64  `json:"last_post_at"`
 	TotalMsgCount int64  `json:"total_msg_count"`
+	IsDefault     int64  `json:"is_default"`
 }
 
 func (o *Channel) ToJson() string {

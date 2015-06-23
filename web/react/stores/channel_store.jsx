@@ -162,6 +162,20 @@ var ChannelStore = assign({}, EventEmitter.prototype, {
 
     return extra;
   },
+  getDefaultChannels: function() {
+    var defaultChannels = [], channels = this.getAll();
+
+    for (var curChannel in channels) {
+      if (curChannel.is_default) {
+        defaultChannels.push(curChannel);
+      }
+    }
+
+    return defaultChannels;
+  },
+  setDefaultChannels: function(channels) {
+    this._storeChannels(channels);
+  },
   _storeChannels: function(channels) {
     sessionStorage.setItem("channels", JSON.stringify(channels));
   },
