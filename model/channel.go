@@ -98,6 +98,7 @@ func (o *Channel) PreSave() {
 
 	o.CreateAt = GetMillis()
 	o.UpdateAt = o.CreateAt
+	o.IsDefault = 0
 }
 
 func (o *Channel) PreUpdate() {

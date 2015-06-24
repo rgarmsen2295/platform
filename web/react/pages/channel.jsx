@@ -12,6 +12,7 @@ var SidebarRight = require('../components/sidebar_right.jsx');
 var SidebarRightMenu = require('../components/sidebar_right_menu.jsx');
 var GetLinkModal = require('../components/get_link_modal.jsx');
 var MemberInviteModal = require('../components/invite_member_modal.jsx');
+var DefaultChannelModal = require('../components/default_channel_modal.jsx');
 var EditChannelModal = require('../components/edit_channel_modal.jsx');
 var DeleteChannelModal = require('../components/delete_channel_modal.jsx');
 var RenameChannelModal = require('../components/rename_channel_modal.jsx');
@@ -87,6 +88,11 @@ global.window.setup_channel_page = function(team_name, team_type, channel_name, 
     React.render(
         <MemberInviteModal />,
         document.getElementById('invite_member_modal')
+    );
+
+    React.render(
+        <DefaultChannelModal />,
+        document.getElementById('default_channel_modal')
     );
 
     React.render(

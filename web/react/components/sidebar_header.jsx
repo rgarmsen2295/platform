@@ -36,6 +36,7 @@ var NavbarDropdown = React.createClass({
         var team_link = "";
         var invite_link = "";
         var manage_link = "";
+        var default_link = "";
         var rename_link = "";
         var currentUser = UserStore.getCurrentUser()
         var isAdmin = false;
@@ -103,6 +104,7 @@ var NavbarDropdown = React.createClass({
                         { invite_link }
                         { team_link }
                         { manage_link }
+                        { default_link }
                         { rename_link }
                         <li><a href="#" onClick={this.handleLogoutClick}>Logout</a></li>
                         { teams }

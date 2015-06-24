@@ -1091,6 +1091,68 @@ var AppearanceTab = React.createClass({
      }
 });
 
+var AdminTab = React.createClass({
+    getInitialState: function() {
+        var currentMember = UserStore.getCurrentUser();
+
+        return { isAdmin: currentMember.roles.indexOf("admin") > -1 || currentMember.roles.indexOf("admin") };
+    },
+    render: function() {
+        var server_error = this.state.server_error ? this.state.server_error : null;
+
+        notAdmin = (
+            <SettingItemMin
+                title="Default Channels"
+                descibe="You do not have admin privilege and therefore cannot access this features"
+                updateSection={function(){self.props.updateSection("admin");}}
+            />
+        );
+
+        defaultChannelSection = (
+            <SettingItemMin
+                title="Default Channels"
+                describe="Choose what channels you want new users to join when they signup for Mattermost"
+                updateSection={function(){self.props.updateSection("admin");}}
+            />
+        );
+
+        /*updateSection={function(){self.props.updateSection("admin");}}*/
+
+        if (this.state.isAdmin) {
+            return (
+                <div>
+                    <div className="modal-header">
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 className="modal-title" ref="title"><i className="modal-back"></i>Admin Settings</h4>
+                    </div>
+                    <div className="user-settings">
+                        <h3 className="tab-header">Admin Settings</h3>
+                        <div className="divider-dark first"/>
+                        {defaultChannelSection}
+                        <div className="divider-dark"/>
+                    </div>
+                </div>
+            );
+        }
+        else {
+            return (
+                <div>
+                    <div className="modal-header">
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 className="modal-title" ref="title"><i className="modal-back"></i>Admin Settings</h4>
+                    </div>
+                    <div className="user-settings">
+                        <h3 className="tab-header">Admin Settings</h3>
+                        <div className="divider-dark first"/>
+                        {notAdmin}
+                        <div className="divider-dark"/>
+                    </div>
+                </div>
+            );
+        }
+    }
+});
+
 module.exports = React.createClass({
     componentDidMount: function() {
         UserStore.addChangeListener(this._onChange);
@@ -1147,6 +1209,12 @@ module.exports = React.createClass({
             return (
                 <div>
                     <AppearanceTab activeSection={this.props.activeSection} updateSection={this.props.updateSection} />
+                </div>
+            );
+        } else if (this.props.activeTab === 'admin') {
+            return (
+                <div>
+                    <AdminTab activeSection={this.props.activeSection} updateSection={this.props.updateSection} />
                 </div>
             );
         } else {

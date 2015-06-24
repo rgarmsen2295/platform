@@ -13,6 +13,7 @@ module.exports = React.createClass({
         var team_link = "";
         var invite_link = "";
         var manage_link = "";
+        var default_link = "";
         var rename_link = "";
         var currentUser = UserStore.getCurrentUser()
         var isAdmin = false;
@@ -41,6 +42,11 @@ module.exports = React.createClass({
                     <a href="#" data-toggle="modal" data-target="#team_members"><i className="glyphicon glyphicon-wrench"></i>Manage Team</a>
                 </li>
             );
+            default_link = (
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#default_channels"><i className="glyphicon glyphicon-cog"></i>Manage Default Channels</a>
+                </li>
+            );
             rename_link = (
                 <li>
                     <a href="#" data-toggle="modal" data-target="#rename_team_link"><i className="glyphicon glyphicon-pencil"></i>Rename</a>
@@ -63,6 +69,7 @@ module.exports = React.createClass({
                         { invite_link }
                         { team_link }
                         { manage_link }
+                        { default_link }
                         { rename_link }
                         <li><a href="#" onClick={this.handleLogoutClick}><i className="glyphicon glyphicon-log-out"></i>Logout</a></li>
                         <li className="divider"></li>
