@@ -258,6 +258,40 @@ func updateChannelDesc(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*func updateDefaultChannels(c *Context, w http.ResponseWriter, r *http.Request) {
+	props := model.MapFromJson(r.Body)
+	channelId := props["channel_id"]
+	teamId := props["team_id"]
+
+	sc := Srv.Store.Channel().GetChannels(teamId)
+
+	if cresult := <-sc; cresult.Err != nil {
+		c.Err = cresult.Err
+		return
+	} else {
+
+
+		channel := cresult.Data.(*model.Channel)
+		// Don't need to do anything channel member, just wanted to confirm it exists
+
+		if !c.HasPermissionsToTeam(channel.TeamId, "updateChannelDesc") {
+			return
+		}
+
+		channel.Description = channelDesc
+
+		for _, oldChannel := range sc {
+			if ucresult := <-Srv.Store.Channel().Update(oldChannel); ucresult.Err != nil {
+				c.Err = ucresult.Err
+				return
+			} else {
+				c.LogAudit("name=" + channel.Name)
+				w.Write([]byte(oldChannel.ToJson()))
+			}
+		}
+	}
+}*/
+
 func getChannels(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// user is already in the newtork

@@ -5,6 +5,7 @@
 var utils = require('../utils/utils.jsx');
 var client = require('../utils/client.jsx');
 var UserStore = require('../stores/user_store.jsx');
+var ChannelStore = require('../stores/channel_store.jsx');
 
 
 module.exports = React.createClass({
@@ -15,7 +16,7 @@ module.exports = React.createClass({
         if (!this.state.user.username) {
             this.setState({name_error: "This field is required", email_error: "", password_error: ""});
             return;
-        }
+        }   
 
         var username_error = utils.isValidUsername(this.state.user.username)
         if (username_error === "Cannot use a reserved word as a username.") {
@@ -54,6 +55,18 @@ module.exports = React.createClass({
                             if (this.props.hash > 0)
                                 localStorage.setItem(this.props.hash, JSON.stringify({wizard: "finished"}));
                             window.location.href = '/channels/town-square';
+
+                            /*var channels = ChannelStore.getAll();
+
+                            for (var i = 0; i < channels.length; i++) {
+                                if (channels[i].is_default) {
+                                    Client.joinChannel(channels[i].id, null, 
+                                        function(err) {
+                                            this.setState({ server_error: err });
+                                        }.bind(this)
+                                    );
+                                }
+                            }*/
                         }.bind(this),
                         function(err) {
                             this.state.server_error = err.message;

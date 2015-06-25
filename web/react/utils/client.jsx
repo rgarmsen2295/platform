@@ -462,7 +462,7 @@ module.exports.updateChannelDesc = function(data, success, error) {
 
 module.exports.updateDefaultChannels = function(data, success, error) {
     $.ajax({
-        url: "/api/v1/channels/update_default",
+        url: "/api/v1/channels/update_default_channels",
         dataType: 'json',
         contentType: 'application/json',
         type: 'POST',
@@ -474,7 +474,7 @@ module.exports.updateDefaultChannels = function(data, success, error) {
         }
     });
 
-    module,exports.track('api', 'api_channels_default_channels');
+    module,exports.track('api', 'api_update_default_channels');
 };
 
 module.exports.updateNotifyLevel = function(data, success, error) {
