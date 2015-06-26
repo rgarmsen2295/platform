@@ -16,7 +16,7 @@ module.exports = React.createClass({
         if (!this.state.user.username) {
             this.setState({name_error: "This field is required", email_error: "", password_error: ""});
             return;
-        }   
+        }
 
         var username_error = utils.isValidUsername(this.state.user.username)
         if (username_error === "Cannot use a reserved word as a username.") {
@@ -41,6 +41,28 @@ module.exports = React.createClass({
 
         this.state.user.allow_marketing = this.refs.email_service.getDOMNode().checked;
 
+        var channels = ChannelStore._getMoreChannels();
+
+        console.log(channels.length);
+
+        for (var i = 0; i < channels.length; i++) {
+            if (channels[i].is_default && channels[i].name !== "town-square") {
+                //ChannelStore.setChannelMember(UserStore.getCurrentUser());
+
+                console.log(channels[i].display_name);
+
+                client.joinChannel(channels[i].id,
+                    function(data) {
+                        asyncClient.getChannels(true);
+                    }.bind(this), 
+                    function(err) {
+                        this.setState({ server_error: err });
+                        AsyncClient.getChannels(true);
+                    }.bind(this)
+                );
+            }
+        }
+
         client.createUser(this.state.user, this.state.data, this.state.hash,
             function(data) {
                 client.track('signup', 'signup_user_02_complete');
@@ -51,22 +73,10 @@ module.exports = React.createClass({
                             UserStore.setLastDomain(this.props.domain);
                             UserStore.setLastEmail(this.state.user.email);
                             UserStore.setCurrentUser(data);
-                            
+
                             if (this.props.hash > 0)
                                 localStorage.setItem(this.props.hash, JSON.stringify({wizard: "finished"}));
                             window.location.href = '/channels/town-square';
-
-                            /*var channels = ChannelStore.getAll();
-
-                            for (var i = 0; i < channels.length; i++) {
-                                if (channels[i].is_default) {
-                                    Client.joinChannel(channels[i].id, null, 
-                                        function(err) {
-                                            this.setState({ server_error: err });
-                                        }.bind(this)
-                                    );
-                                }
-                            }*/
                         }.bind(this),
                         function(err) {
                             this.state.server_error = err.message;

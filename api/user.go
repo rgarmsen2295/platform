@@ -188,10 +188,10 @@ func CreateUser(c *Context, team *model.Team, user *model.User) *model.User {
 		} else {
 			cm := &model.ChannelMember{ChannelId: cresult.Data.(*model.Channel).Id, UserId: ruser.Id, NotifyLevel: model.CHANNEL_NOTIFY_ALL, Roles: channelRole}
 			if cmresult := <-Srv.Store.Channel().SaveMember(cm); cmresult.Err != nil {
-				l4g.Error("Failed to add member town-square err=%v", cmresult.Err)
+				//l4g.Error("Failed to add member town-square err=%v", cmresult.Err)
 			}
 		}
-
+		
 		//fireAndForgetWelcomeEmail(strings.Split(ruser.FullName, " ")[0], ruser.Email, team.Name, c.TeamUrl+"/channels/town-square")
 
 		if user.EmailVerified {
@@ -201,6 +201,20 @@ func CreateUser(c *Context, team *model.Team, user *model.User) *model.User {
 		} else {
 			FireAndForgetVerifyEmail(result.Data.(*model.User).Id, strings.Split(ruser.FullName, " ")[0], ruser.Email, team.Name, c.TeamUrl)
 		}
+
+		/*channels := (<-Srv.Store.Channel().GetMoreChannels(team.Id, ruser.Id)).Data.([]*model.Channel)
+
+		//fmt.Printf("%v", channels[1].Id)
+
+		for _, curChannel := range channels {
+			if (curChannel.IsDefault > 0 && curChannel.Name != "town-square") {
+				cmm := &model.ChannelMember{ChannelId: curChannel.Id, UserId: ruser.Id, NotifyLevel: model.CHANNEL_NOTIFY_ALL, Roles: channelRole}
+				if cmmresult := <-Srv.Store.Channel().SaveMember(cmm); cmmresult.Err != nil {
+				//	l4g.Error("Failed to add member town-square err=%v", cmmresult.Err)
+				}
+				cmm.MsgCount++;
+			}
+		}*/
 
 		ruser.Sanitize(map[string]bool{})
 
