@@ -54,6 +54,9 @@ module.exports = React.createClass({
         var postImageModalId = "view_image_modal_" + post.id;
         var inner = utils.textToJsx(this.state.message);
 
+        console.log(this.state.message);
+        console.log(inner);
+
         var comment = "";
         var reply = "";
         var postClass = "";

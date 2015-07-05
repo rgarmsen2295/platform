@@ -470,7 +470,26 @@ module.exports.textToJsx = function(text, options) {
             } else if (word === "") {
                 // if word is empty dont include a span
             } else {
-                inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
+                var cssTextFormatting = "";
+
+                if (word.charAt(0) === '*' && word.charAt(word.length - 1) === '*') {
+                    word = word.slice(1, word.length - 1);
+                    cssTextFormatting = " bold-highlight";
+                } else if (word.charAt(0) === '_' && word.charAt(word.length - 1) === '_') {
+                    word = word.slice(1, word.length - 1);
+                    cssTextFormatting = " italic-highlight";
+                } else if (word.charAt(0) === '`' && word.charAt(word.length - 1) === '`') {
+                    word = word.slice(1, word.length - 1);
+                    cssTextFormatting = " code-highlight";
+                } else if (word.length > 6 && word.substring(0, 3) === "```" && word.substring(word.length - 3) === "```") {
+                    word = word.slice(3, word.length - 3);
+                    cssTextFormatting = " plaintext-highlight";
+                } else if (word.length > 1 && word.charAt(0) === '>') {
+                    word = word.slice(1);
+                    cssTextFormatting = " quote-highlight";
+                } 
+
+                inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass + cssTextFormatting}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
             }
             highlightSearchClass = "";
         }
