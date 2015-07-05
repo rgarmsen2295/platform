@@ -472,6 +472,9 @@ module.exports.textToJsx = function(text, options) {
             } else {
                 var cssTextFormatting = "";
 
+                // Need to make it carry over multiple words, mark with css as start bold, or end bold, check to see if both otherwise remove markup (might be hard on my end)?
+                // Caret comments already done with Corey's hackathon? Quote needs to be the first word only?
+
                 if (word.charAt(0) === '*' && word.charAt(word.length - 1) === '*') {
                     word = word.slice(1, word.length - 1);
                     cssTextFormatting = " bold-highlight";
