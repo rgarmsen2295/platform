@@ -403,6 +403,8 @@ module.exports.textToJsx = function(text, options) {
 
     var lines = text.split("\n");
     var urlMatcher = new LinkifyIt();
+    var cssBold = "", cssItalic = "", cssCode = "", cssPlaintext = "", cssQuote = "";
+    var boldFlag = false, italicFlag = false, codeFlag = false, plaintextFlag = false, quoteFlag = false;
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         var words = line.split(" ");
@@ -470,29 +472,75 @@ module.exports.textToJsx = function(text, options) {
             } else if (word === "") {
                 // if word is empty dont include a span
             } else {
-                var cssTextFormatting = "";
+                var doneFormatChecking = false;
+                while (!doneFormatChecking) {
+                    doneFormatChecking = true;
 
-                // Need to make it carry over multiple words, mark with css as start bold, or end bold, check to see if both otherwise remove markup (might be hard on my end)?
-                // Caret comments already done with Corey's hackathon? Quote needs to be the first word only?
+                    if (word.charAt(0) === '*' || boldFlag) {
+                        if (word.charAt(0) === '*' && !boldFlag) {
+                            word = word.slice(1, word.length);
+                            boldFlag = true;
+                            cssBold = " bold-highlight";
+                            doneFormatChecking = false;
+                        }
+                        else if (word.charAt(word.length - 1) === '*' && boldFlag) {
+                            word = word.slice(0, word.length - 1);
+                            boldFlag = false;
+                            doneFormatChecking = false;
+                        }
+                    }
+                    if (word.charAt(0) === '_' || italicFlag) {
+                        if (word.charAt(0) === '_' && !italicFlag) {
+                            word = word.slice(1, word.length);
+                            italicFlag = true;
+                            cssItalic = " italic-highlight";
+                            doneFormatChecking = false;
+                        }
+                        else if (word.charAt(word.length - 1) === '_' && italicFlag) {
+                            word = word.slice(0, word.length - 1);
+                            italicFlag = false;
+                            doneFormatChecking = false;
+                        }
+                    }
+                    if (word.length > 6 && word.substring(0, 3) === "```" && word.substring(word.length - 3) === "```") {
+                        if (word.charAt(0) === '```' && !plaintextFlag) {
+                            word = word.slice(1, word.length);
+                            plaintextFlag = true;
+                            cssPlaintext = " plaintext-highlight";
+                            doneFormatChecking = false;
+                        }
+                        if (word.charAt(word.length - 1) === '_' && plaintextFlag) {
+                            word = word.slice(0, word.length - 1);
+                            plaintextFlag = false;
+                            doneFormatChecking = false;
+                        }
+                    }
+                    if (word.charAt(0) === '`' || codeFlag) {
+                        if (word.charAt(0) === '`' && !codeFlag) {
+                            word = word.slice(1, word.length);
+                            codeFlag = true;
+                            cssCode = " code-highlight";
+                            doneFormatChecking = false;
+                        }
+                        else if (word.charAt(word.length - 1) === '`' && codeFlag) {
+                            word = word.slice(0, word.length - 1);
+                            codeFlag = false;
+                            doneFormatChecking = false;
+                        }
+                    }
+                    if (inner === [] && word.charAt(0) === '>') {
+                        quoteFlag = true;
+                        cssQuote = " quote-highlight";
+                        doneFormatChecking = false;
+                    }
+                }
 
-                if (word.charAt(0) === '*' && word.charAt(word.length - 1) === '*') {
-                    word = word.slice(1, word.length - 1);
-                    cssTextFormatting = " bold-highlight";
-                } else if (word.charAt(0) === '_' && word.charAt(word.length - 1) === '_') {
-                    word = word.slice(1, word.length - 1);
-                    cssTextFormatting = " italic-highlight";
-                } else if (word.charAt(0) === '`' && word.charAt(word.length - 1) === '`') {
-                    word = word.slice(1, word.length - 1);
-                    cssTextFormatting = " code-highlight";
-                } else if (word.length > 6 && word.substring(0, 3) === "```" && word.substring(word.length - 3) === "```") {
-                    word = word.slice(3, word.length - 3);
-                    cssTextFormatting = " plaintext-highlight";
-                } else if (word.length > 1 && word.charAt(0) === '>') {
-                    word = word.slice(1);
-                    cssTextFormatting = " quote-highlight";
-                } 
+                inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass + cssBold + cssItalic + cssCode + cssPlaintext + cssQuote}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
 
-                inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass + cssTextFormatting}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
+                cssBold = cssBold === " bold-highlight" && !boldFlag ? "" : cssBold;
+                cssItalic = cssItalic === " italic-highlight" && !italicFlag ? "" : cssItalic;
+                cssCode = cssCode === " code-highlight" && !codeFlag ? "" : cssCode;
+                cssPlaintext = cssPlaintext === " plaintext-highlight" && !plaintextFlag ? "" : cssPlaintext;
             }
             highlightSearchClass = "";
         }
