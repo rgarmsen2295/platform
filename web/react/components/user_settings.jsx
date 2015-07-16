@@ -61,16 +61,14 @@ var NotificationsTab = React.createClass({
         data["desktop_sound"] = this.state.enable_sound;
         data["desktop"] = this.state.notify_level;
 
-        console.log(data["user_id"]);
-
-        var string_keys = [];
+        var string_keys = "";
         if (this.state.custom_keys.length > 0 && this.state.custom_keys_checked) {
             string_keys = this.state.custom_keys;
         }
 
         data["mention_keys"] = string_keys;
-        //data["username"] = this.state.username_key ? "true" : "false";
-        //data["mention"] = this.state.mention_key ? "true" : "false";
+        data["username"] = this.state.username_key ? "true" : "false";
+        data["mention"] = this.state.mention_key ? "true" : "false";
         data["first_name"] = this.state.first_name_key ? "true" : "false";
         data["all"] = this.state.all_key ? "true" : "false";
         data["channel"] = this.state.channel_key ? "true" : "false";

@@ -1150,7 +1150,6 @@ func fireAndForgetEmailChangeEmail(email, teamName, teamUrl string) {
 func updateUserNotify(c *Context, w http.ResponseWriter, r *http.Request) {
 	props := model.MapFromJson(r.Body)
 
-
 	user_id := props["user_id"]
 	if len(user_id) != 26 {
 		c.SetInvalidParam("updateUserNotify", "user_id")
