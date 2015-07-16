@@ -25,23 +25,15 @@ function getNotificationsStateFromStores() {
 
     if (user.notify_props) {
         if (user.notify_props.mention_keys !== undefined) {
-            var keys = user.notify_props.mention_keys.split(',');
+            custom_keys = user.notify_props.mention_keys;
+        }
 
-            if (keys.indexOf(user.username) !== -1) {
-                username_key = true;
-                keys.splice(keys.indexOf(user.username), 1);
-            } else {
-                username_key = false;
-            }
+        if (user.notify_props.username !== undefined) {
+            username_key = user.notify_props.username === "true";
+        }
 
-            if (keys.indexOf('@'+user.username) !== -1) {
-                mention_key = true;
-                keys.splice(keys.indexOf('@'+user.username), 1);
-            } else {
-                mention_key = false;
-            }
-
-            custom_keys = keys.join(',');
+        if (user.notify_props.mention !== undefined) {
+            mention_key = user.notify_props.mention === "true";
         }
 
         if (user.notify_props.first_name !== undefined) {
@@ -69,19 +61,21 @@ var NotificationsTab = React.createClass({
         data["desktop_sound"] = this.state.enable_sound;
         data["desktop"] = this.state.notify_level;
 
-        var mention_keys = [];
-        if (this.state.username_key) mention_keys.push(this.props.user.username);
-        if (this.state.mention_key) mention_keys.push('@'+this.props.user.username);
+        console.log(data["user_id"]);
 
-        var string_keys = mention_keys.join(',');
+        var string_keys = [];
         if (this.state.custom_keys.length > 0 && this.state.custom_keys_checked) {
-            string_keys += ',' + this.state.custom_keys;
+            string_keys = this.state.custom_keys;
         }
 
         data["mention_keys"] = string_keys;
+        //data["username"] = this.state.username_key ? "true" : "false";
+        //data["mention"] = this.state.mention_key ? "true" : "false";
         data["first_name"] = this.state.first_name_key ? "true" : "false";
         data["all"] = this.state.all_key ? "true" : "false";
         data["channel"] = this.state.channel_key ? "true" : "false";
+
+        console.log(data["user_id"]);
 
         client.updateUserNotifyProps(data,
             function(data) {
