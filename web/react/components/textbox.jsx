@@ -103,7 +103,7 @@ module.exports = React.createClass({
         this.resize();
     },
     getInitialState: function() {
-        return { mentionText: '-1', mentions: [], connection: "", timerInterrupt: null };
+        return { mentionText: '-1', mentions: [], connection: "", timerInterrupt: null, placeholder: true };
     },
     updateMentionTab: function(mentionText, excludeList) {
         var self = this;
@@ -318,12 +318,14 @@ module.exports = React.createClass({
         if (elm.title === elm.value) {
             elm.value = "";
         }
+        this.setState({ placeholder: false });
     },
     handleBlur: function() {
         var elm = this.refs.message.getDOMNode();
         if (elm.value === '') {
             elm.value = elm.title;
         }
+        this.setState({ placeholder: true });
     },
     handlePaste: function() {
         this.doProcessMentions = true;
@@ -333,7 +335,7 @@ module.exports = React.createClass({
             <div ref="wrapper" className="textarea-wrapper">
                 <CommandList ref='commands' addCommand={this.addCommand} channelId={this.props.channelId} />
                 <div className="form-control textarea-div" ref="textdiv"/>
-                <textarea id={this.props.id} ref="message" className={"form-control custom-textarea " + this.state.connection} spellCheck="true" autoComplete="off" autoCorrect="off" rows="1" placeholder={this.props.createMessage} value={this.props.messageText} onInput={this.handleChange} onChange={this.handleChange} onKeyPress={this.handleKeyPress} onKeyDown={this.handleKeyDown} onScroll={this.scroll} onFocus={this.handleFocus} onBlur={this.handleBlur} onPaste={this.handlePaste} />
+                <textarea id={this.props.id} ref="message" className={"form-control custom-textarea " + this.state.connection} spellCheck="true" autoComplete="off" autoCorrect="off" rows="1" placeholder={this.state.placeholder ? this.props.createMessage : ""} value={this.props.messageText} onInput={this.handleChange} onChange={this.handleChange} onKeyPress={this.handleKeyPress} onKeyDown={this.handleKeyDown} onScroll={this.scroll} onFocus={this.handleFocus} onBlur={this.handleBlur} onPaste={this.handlePaste} />
             </div>
         );
     }
