@@ -658,23 +658,41 @@ func removeChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	userId := data["user_id"]
 
 	if len(userId) != 26 {
-		c.SetInvalidParam("addChannelMember", "user_id")
+		c.SetInvalidParam("removeChannelMember", "user_id")
 		return
 	}
 
 	sc := Srv.Store.Channel().Get(id)
-	cmc := Srv.Store.Channel().GetMember(id, c.Session.UserId)
 
 	if cresult := <-sc; cresult.Err != nil {
 		c.Err = cresult.Err
-		return
-	} else if cmcresult := <-cmc; cmcresult.Err != nil {
-		c.Err = cmcresult.Err
 		return
 	} else {
 		channel := cresult.Data.(*model.Channel)
 
 		if !c.HasPermissionsToTeam(channel.TeamId, "removeChannelMember") {
+			return
+		}
+
+		cchan := Srv.Store.Channel().CheckPermissionsTo(c.Session.TeamId, id, c.Session.UserId)
+
+		if !c.HasPermissionsToChannel(cchan, "removeChannelMember") {
+			return
+		}
+
+		cmc := Srv.Store.Channel().GetMember(id, userId)
+		cmcresult := <-cmc
+		
+		if cmcresult.Err != nil {
+	 		c.Err = cmcresult.Err
+	 		return
+	 	}
+
+		channelMember := cmcresult.Data.(model.ChannelMember)
+
+		if strings.Contains(channelMember.Roles, model.CHANNEL_ROLE_ADMIN) {
+			c.Err = model.NewAppError("updateChannel", "You do not have the appropriate permissions ", "")
+			c.Err.StatusCode = http.StatusForbidden
 			return
 		}
 
