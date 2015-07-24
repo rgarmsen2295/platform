@@ -663,7 +663,7 @@ func TestRemoveChannelMember(t *testing.T) {
 	Client.LoginByEmail(team.Name, userStd.Email, "pwd")
 
 	if _, err := Client.RemoveChannelMember(channel2.Id, userStd.Id); err == nil {
-		t.Fatal("Should have errored, normal member cannot remove channel admin")
+		t.Fatal("Should have errored, non-team members cannot remove members")
 	}
 
 	Client.LoginByEmail(team.Name, userTeamAdmin.Email, "pwd")
