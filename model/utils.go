@@ -315,6 +315,8 @@ func GetImageMimeType(ext string) string {
 func ClearMentionTags(post string) string {
 	post = strings.Replace(post, "<mention>", "", -1)
 	post = strings.Replace(post, "</mention>", "", -1)
+	post = strings.Replace(post, "", "", -1)
+	//<mark style=\"background-color: #fff2bb\">
 	return post
 }
 
