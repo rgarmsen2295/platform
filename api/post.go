@@ -395,6 +395,18 @@ func fireAndForgetNotifications(post *model.Post, teamId, siteURL string) {
 						continue
 					}
 
+					splitF := func(c rune) bool {
+						return model.SplitRunes[c]
+					}
+
+					highlightedMessage := post.Message
+					for _, word := range highlightedMessage {
+						userIds2, firstNameMatch := keywordMap[word]
+						if (userId == id) {
+							highlightedMessage = strings.Replace(highlightedMessage, , "<mark style=\"background-color: #fff2bb\">" + + "</mark>", -1)
+						}
+					}
+
 					bodyPage := NewServerTemplatePage("post_body", siteURL)
 					bodyPage.Props["Nickname"] = profileMap[id].FirstName
 					bodyPage.Props["TeamDisplayName"] = teamDisplayName
