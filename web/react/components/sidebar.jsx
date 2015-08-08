@@ -196,8 +196,8 @@ module.exports = React.createClass({
                         utils.notifyMe(title, username + ' did something new', channel);
                     }
                 } else {
-                    var useMarkdown = config.AllowMarkdown;
-                    if (useMarkdown) {
+                    var textFormatting = config.TextFormatting;
+                    if (textFormatting) {
                         notifyText = marked(notifyText, {sanitize: false, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
                     }
                     notifyText = utils.replaceHtmlEntities(notifyText);

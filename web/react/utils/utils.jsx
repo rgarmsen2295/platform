@@ -391,25 +391,6 @@ module.exports.searchForTerm = function(term) {
 module.exports.customMarkedRenderer = function(options) {
     var customMarkedRenderer = new marked.Renderer();
 
-    customMarkedRenderer.heading = function(text, level) {
-        return '<h' + level + '>' + text + '</h' + level + '>';
-    };
-    customMarkedRenderer.code = function(code, language) {
-        return '<pre>' + code + '</pre>';
-    };
-    customMarkedRenderer.codespan = function(code) {
-        return '<pre>' + code + '</pre>';
-    };
-    customMarkedRenderer.del = function(text) {
-        return '<s>' + text + '</s>';
-    };
-    customMarkedRenderer.link = function(href, title, text) {
-        return href;
-    };
-    customMarkedRenderer.image = function(href, title, text) {
-        return href;
-    };
-
     if (options) {
         if (options.disable) {
             customMarkedRenderer.heading = function(text, level) {
@@ -448,6 +429,74 @@ module.exports.customMarkedRenderer = function(options) {
             customMarkedRenderer.codespan = function(code) {
                 return code;
             };
+            customMarkedRenderer.link = function(href, title, text) {
+                return href;
+            };
+            customMarkedRenderer.image = function(href, title, text) {
+                return href;
+            };
+        } else if (options.basic || options.pro) { /* Remove || options.pro to support pro level */
+            customMarkedRenderer.heading = function(text, level) {
+                return text;
+            };
+            customMarkedRenderer.hr = function() {
+                return '\n';
+            };
+            customMarkedRenderer.code = function(code, language) {
+                return code; // Supported, use `code`
+            };
+            customMarkedRenderer.blockquote = function(quote) {
+                return quote;
+            };
+            customMarkedRenderer.list = function(body, ordered) {
+                return body;
+            };
+            customMarkedRenderer.listitem = function(text) {
+                return text + ' ';
+            };
+            customMarkedRenderer.paragraph = function(text) {
+                return text + ' ';
+            };
+            customMarkedRenderer.strong = function(text) {
+                return text; // Supported, use *text*
+            };
+            customMarkedRenderer.em = function(text) {
+                return text; // Suported, use _text_
+            };
+            customMarkedRenderer.br = function() {
+                return '\n';
+            };
+            customMarkedRenderer.del = function(text) {
+                return text;
+            };
+            customMarkedRenderer.codespan = function(code) {
+                return code;
+            };
+            customMarkedRenderer.link = function(href, title, text) {
+                return href;
+            };
+            customMarkedRenderer.image = function(href, title, text) {
+                return href;
+            };
+        } else if (options.pro) {
+            customMarkedRenderer.heading = function(text, level) {
+                return '<h' + level + '>' + text + '</h' + level + '>';
+            };
+            customMarkedRenderer.code = function(code, language) {
+                return '<pre>' + code + '</pre>';
+            };
+            customMarkedRenderer.codespan = function(code) {
+                return '<pre>' + code + '</pre>';
+            };
+            customMarkedRenderer.del = function(text) {
+                return '<s>' + text + '</s>';
+            };
+            customMarkedRenderer.link = function(href, title, text) {
+                return href;
+            };
+            customMarkedRenderer.image = function(href, title, text) {
+                return href;
+            };
         }
     }
     return customMarkedRenderer;
@@ -460,10 +509,14 @@ var startTagRegex = /(<\s*\w.*?>)+/g;
 var endTagRegex = /(<\s*\/\s*\w\s*.*?>|<\s*br\s*>)+/g;
 
 module.exports.textToJsx = function(text, options) {
-    var useMarkdown = config.AllowMarkdown && (!options || !options.noMarkdown);
+    var textFormatting = config.TextFormatting;
+    var useTextFormatting = textFormatting && (!options || !options.noTextFormatting);
 
-    if (useMarkdown) {
-        text = marked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer()});
+    if (useTextFormatting && textFormatting === 'basic') {
+        text = marked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({basic: true})});
+    } else if (useTextFormatting && textFormatting === 'pro') {
+        // TODO - Allow full markdown support for pro level, currently just does same as basic
+        text = marked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({pro: true})});
     }
 
     if (options && options['singleline']) {
@@ -496,7 +549,7 @@ module.exports.textToJsx = function(text, options) {
         for (var z = 0; z < words.length; z++) {
             var word = words[z];
             var trimWord;
-            if (useMarkdown) {
+            if (useTextFormatting) {
                 trimWord = word.replace(endTagRegex, '').replace(startTagRegex, '').replace(puncStartRegex, '').replace(puncEndRegex, '').trim();
             } else {
                 trimWord = word.replace(puncStartRegex, '').replace(puncEndRegex, '').trim();
@@ -508,7 +561,7 @@ module.exports.textToJsx = function(text, options) {
             var suffix;
             var prefixSpan;
             var suffixSpan;
-            if (useMarkdown) {
+            if (useTextFormatting) {
                 prefix = (word.match(startTagRegex) ? word.match(startTagRegex) : "") + (word.replace(startTagRegex, '').match(puncStartRegex) ? word.replace(startTagRegex, '').match(puncStartRegex) : "");
                 suffix = (word.match(endTagRegex) ? word.match(endTagRegex) : "") + (word.replace(endTagRegex, '').match(puncEndRegex) ? word.replace(endTagRegex, '').match(puncEndRegex) : "");
                 prefixSpan = prefix ? (<span key={word+i+z+"pre_span"}><span dangerouslySetInnerHTML={{__html: prefix}} /></span>) : null;
@@ -536,7 +589,7 @@ module.exports.textToJsx = function(text, options) {
                     highlightSearchClass = " search-highlight";
                 }
 
-                if (useMarkdown) {
+                if (useTextFormatting) {
                     prefixSpan ? inner.push(prefixSpan) : null;
                     inner.push(<span key={word+i+z+"word_span"}><a className={mClass + highlightSearchClass + " mention-link"} key={name+i+z+"_link"} href="#" onClick={function(value) { return function() { module.exports.searchForTerm(value); } }(name)}>{"@" + name}</a></span>);
                     suffixSpan ? inner.push(suffixSpan) : null;
@@ -552,7 +605,7 @@ module.exports.textToJsx = function(text, options) {
                 prefixSpan = prefix ? (<span key={word+i+z+"pre_span"}><span dangerouslySetInnerHTML={{__html: prefix}} /></span>) : null;
                 suffixSpan = suffix ? (<span key={word+i+z+"suf_span"}><span dangerouslySetInnerHTML={{__html: suffix}} /> </span>) : <span key={word+i+z+"suf_span"}> </span>;
 
-                if (useMarkdown) {
+                if (useTextFormatting) {
                     prefixSpan ? inner.push(prefixSpan) : null;
                     inner.push(<span key={word+i+z+"_span"}><a key={name+i+z+"_link"} className={"theme" + highlightSearchClass} target="_blank" href={link}>{match.text}</a></span>);
                     suffixSpan ? inner.push(suffixSpan) : null;
@@ -566,7 +619,7 @@ module.exports.textToJsx = function(text, options) {
                     highlightSearchClass = " search-highlight";
                 }
 
-                if (useMarkdown) {
+                if (useTextFormatting) {
                     prefixSpan ? inner.push(prefixSpan) : null;
                     inner.push(<span key={word+i+z+"_span"}><a key={word+i+z+"_hash"} className={"theme " + mClass + highlightSearchClass} href="#" onClick={function(value) { return function() { module.exports.searchForTerm(value); } }(trimWord)}>{trimWord}</a></span>);
                     suffixSpan ? inner.push(suffixSpan) : null;
@@ -579,7 +632,7 @@ module.exports.textToJsx = function(text, options) {
                     if (searchTerm === trimWord.substring(1).toLowerCase()) {
                         highlightSearchClass = " search-highlight";
                     }
-                    if (useMarkdown) {
+                    if (useTextFormatting) {
                         prefixSpan ? inner.push(prefixSpan) : null;
                         inner.push(<span key={word+i+z+"_span"} key={name+i+z+"_span"}><a className={mentionClass + highlightSearchClass} key={name+i+z+"_link"} href="#">{trimWord}</a></span>);
                         suffixSpan ? inner.push(suffixSpan) : null;
@@ -587,7 +640,7 @@ module.exports.textToJsx = function(text, options) {
                     else
                         inner.push(<span key={word+i+z+"_span"} key={name+i+z+"_span"}>{prefix}<a className={mentionClass + highlightSearchClass} key={name+i+z+"_link"} href="#">{trimWord}</a>{suffix} </span>);
                 } else {
-                    if (useMarkdown) {
+                    if (useTextFormatting) {
                         prefixSpan ? inner.push(prefixSpan) : null;
                         inner.push(<span key={word+i+z+"_span"}><span className={mentionClass + highlightSearchClass}>{trimWord}</span></span>);
                         suffixSpan ? inner.push(suffixSpan) : null;
@@ -599,14 +652,14 @@ module.exports.textToJsx = function(text, options) {
             } else if (word === "") {
                 // if word is empty dont include a span
             } else {
-                if (useMarkdown)
+                if (useTextFormatting)
                     inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass} dangerouslySetInnerHTML={{__html: word}} /> </span>);
                 else
                     inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
             }
             highlightSearchClass = "";
         }
-        if (!useMarkdown && i != lines.length-1)
+        if (!useTextFormatting && i != lines.length-1)
             inner.push(<br key={"br_"+i+z}/>);
     }
 

@@ -235,7 +235,7 @@ module.exports = React.createClass({
         return numToUpload;
     },
     render: function() {
-        var useMarkdown = config.AllowMarkdown;
+        var textFormatting = config.TextFormatting;
 
         var server_error = this.state.server_error ? <div className='has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
         var post_error = this.state.post_error ? <label className='control-label'>{this.state.post_error}</label> : null;
@@ -274,7 +274,7 @@ module.exports = React.createClass({
                         { limit_error }
                         { preview }
                         <MsgTyping channelId={this.state.channel_id} parentId=""/>
-                        { this.state.messageText.split(" ").length > 1 && useMarkdown ?
+                        { this.state.messageText.split(" ").length > 1 && textFormatting ?
                         <div className={"post-markdown-info"}>_<em>italics</em>_ **<strong>bold</strong>** **<strong>bold and _<em>italic</em>_ words</strong>** <a href="https://help.github.com/articles/markdown-basics/">Click here for more...</a></div>
                         :
                         <div><br /></div>

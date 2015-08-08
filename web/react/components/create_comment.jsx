@@ -190,7 +190,7 @@ module.exports = React.createClass({
         return numToUpload;
     },
     render: function() {
-        var useMarkdown = config.AllowMarkdown;
+        var textFormatting = config.TextFormatting;
 
         var server_error = this.state.server_error ? <div className='form-group has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
         var post_error = this.state.post_error ? <label className='control-label'>{this.state.post_error}</label> : null;
@@ -224,7 +224,7 @@ module.exports = React.createClass({
                             onUploadError={this.handleUploadError} />
                     </div>
                     <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />
-                    { this.state.messageText.split(" ").length > 1 && useMarkdown ?
+                    { this.state.messageText.split(" ").length > 1 && textFormatting ?
                     <div className={"comment-markdown-info"}>_<em>italics</em>_ **<strong>bold</strong>** <a href="https://help.github.com/articles/markdown-basics/">Click here for more...</a></div>
                     :
                     <br />

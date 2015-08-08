@@ -20,7 +20,7 @@ module.exports = React.createClass({
         var filenames = this.props.post.filenames;
         var parentPost = this.props.parentPost;
         var inner = utils.textToJsx(this.state.message);
-        var useMarkdown = config.AllowMarkdown;
+        var textFormatting = config.TextFormatting;
 
         var comment = "";
         var reply = "";
@@ -52,7 +52,7 @@ module.exports = React.createClass({
                 }
             }
 
-            if (useMarkdown) {
+            if (textFormatting) {
                 message = marked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
                 comment = (
                     <p className="post-link">
@@ -78,7 +78,7 @@ module.exports = React.createClass({
         return (
             <div className="post-body">
                 { comment }
-                {useMarkdown ?
+                {textFormatting ?
                 <div key={post.id+"_message"} className={postClass}><span>{inner}</span></div>
                 :
                 <p key={post.id+"_message"} className={postClass}><span>{inner}</span></p>

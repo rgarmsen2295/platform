@@ -15,7 +15,9 @@ var config = {
     AllowInviteNames: true,
     RequireInviteNames: false,
     AllowSignupDomainsWizard: false,
-    AllowMarkdown: true,
+
+    // Level of text formatting, none, basic, pro (pro == markdown, currently not implemented)
+    TextFormatting: "basic",
 
     // Google Developer Key (for Youtube API links)
     // Leave blank to disable
