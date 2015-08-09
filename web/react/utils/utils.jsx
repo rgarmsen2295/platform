@@ -443,6 +443,9 @@ module.exports.customMarkedRenderer = function(options) {
             customMarkedRenderer.hr = function() {
                 return '\n';
             };
+            customMarkedRenderer.code = function(code, language) {
+                return code;
+            };
             customMarkedRenderer.blockquote = function(quote) {
                 return quote;
             };
@@ -457,9 +460,6 @@ module.exports.customMarkedRenderer = function(options) {
             };
             customMarkedRenderer.del = function(text) {
                 return text;
-            };
-            customMarkedRenderer.codespan = function(code) {
-                return code;
             };
             customMarkedRenderer.link = function(href, title, text) {
                 return href;
