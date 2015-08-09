@@ -10,6 +10,7 @@ var AsyncClient = require('./async_client.jsx');
 var client = require('./client.jsx');
 var Autolinker = require('autolinker');
 var marked = require('marked');
+var basicMarked = require('../../static/js/marked/lib/marked.js');
 
 module.exports.isEmail = function(email) {
   var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
@@ -389,7 +390,7 @@ module.exports.searchForTerm = function(term) {
       - disable: Parses out *'s and other format specifiers in the text, but doesn't convert to html
 */
 module.exports.customMarkedRenderer = function(options) {
-    var customMarkedRenderer = new marked.Renderer();
+    var customMarkedRenderer = new basicMarked.Renderer();
 
     if (options) {
         if (options.disable) {
@@ -442,9 +443,6 @@ module.exports.customMarkedRenderer = function(options) {
             customMarkedRenderer.hr = function() {
                 return '\n';
             };
-            customMarkedRenderer.code = function(code, language) {
-                return code; // Supported, use `code`
-            };
             customMarkedRenderer.blockquote = function(quote) {
                 return quote;
             };
@@ -453,15 +451,6 @@ module.exports.customMarkedRenderer = function(options) {
             };
             customMarkedRenderer.listitem = function(text) {
                 return text + ' ';
-            };
-            customMarkedRenderer.paragraph = function(text) {
-                return text + ' ';
-            };
-            customMarkedRenderer.strong = function(text) {
-                return text; // Supported, use *text*
-            };
-            customMarkedRenderer.em = function(text) {
-                return text; // Suported, use _text_
             };
             customMarkedRenderer.br = function() {
                 return '\n';
@@ -513,10 +502,10 @@ module.exports.textToJsx = function(text, options) {
     var useTextFormatting = textFormatting && (!options || !options.noTextFormatting);
 
     if (useTextFormatting && textFormatting === 'basic') {
-        text = marked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({basic: true})});
+        text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({basic: true})});
     } else if (useTextFormatting && textFormatting === 'pro') {
         // TODO - Allow full markdown support for pro level, currently just does same as basic
-        text = marked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({pro: true})});
+        text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({pro: true})});
     }
 
     if (options && options['singleline']) {
