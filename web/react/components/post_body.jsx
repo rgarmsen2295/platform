@@ -5,6 +5,7 @@ var FileAttachmentList = require('./file_attachment_list.jsx');
 var UserStore = require('../stores/user_store.jsx');
 var utils = require('../utils/utils.jsx');
 var marked = require('marked');
+var basicMarked = require('../../static/js/marked/lib/marked.js');
 
 module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
@@ -53,7 +54,12 @@ module.exports = React.createClass({
             }
 
             if (textFormatting) {
-                message = marked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
+                /* Remove || options.pro to support pro level */
+                if (textFormatting === 'basic' || textFormatting === 'pro') {
+                    message = basicMarked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
+                } else if (textFormatting === 'pro') {
+                    message = marked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
+                }
                 comment = (
                     <p className="post-link">
                         <span>Commented on {name}{apostrophe} message: <a className="theme" onClick={this.props.handleCommentClick} dangerouslySetInnerHTML={{__html: message}} /></span>

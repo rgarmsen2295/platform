@@ -390,8 +390,7 @@ module.exports.searchForTerm = function(term) {
       - disable: Parses out *'s and other format specifiers in the text, but doesn't convert to html
 */
 module.exports.customMarkedRenderer = function(options) {
-    var customMarkedRenderer = new basicMarked.Renderer();
-
+    var customMarkedRenderer = new marked.Renderer();
     if (options) {
         if (options.disable) {
             customMarkedRenderer.heading = function(text, level) {
@@ -437,6 +436,7 @@ module.exports.customMarkedRenderer = function(options) {
                 return href;
             };
         } else if (options.basic || options.pro) { /* Remove || options.pro to support pro level */
+            customMarkedRenderer = new basicMarked.Renderer();
             customMarkedRenderer.heading = function(text, level) {
                 return text;
             };
@@ -468,6 +468,7 @@ module.exports.customMarkedRenderer = function(options) {
                 return href;
             };
         } else if (options.pro) {
+            customMarkedRenderer = new marked.Renderer();
             customMarkedRenderer.heading = function(text, level) {
                 return '<h' + level + '>' + text + '</h' + level + '>';
             };
@@ -501,10 +502,10 @@ module.exports.textToJsx = function(text, options) {
     var textFormatting = config.TextFormatting;
     var useTextFormatting = textFormatting && (!options || !options.noTextFormatting);
 
-    if (useTextFormatting && textFormatting === 'basic') {
+    /* Remove || options.pro to support pro level */
+    if (useTextFormatting && (textFormatting === 'basic' || textFormatting === 'pro')) {
         text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({basic: true})});
     } else if (useTextFormatting && textFormatting === 'pro') {
-        // TODO - Allow full markdown support for pro level, currently just does same as basic
         text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({pro: true})});
     }
 

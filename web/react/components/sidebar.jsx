@@ -12,6 +12,7 @@ var utils = require('../utils/utils.jsx');
 var SidebarHeader = require('./sidebar_header.jsx');
 var SearchBox = require('./search_bar.jsx');
 var marked = require('marked');
+var basicMarked = require('../../static/js/marked/lib/marked.js');
 
 var Constants = require('../utils/constants.jsx');
 var ActionTypes = Constants.ActionTypes;
@@ -197,7 +198,10 @@ module.exports = React.createClass({
                     }
                 } else {
                     var textFormatting = config.TextFormatting;
-                    if (textFormatting) {
+                    /* Remove || options.pro to support pro level */
+                    if (textFormatting === 'basic' || textFormatting === 'pro') {
+                        notifyText = basicMarked(notifyText, {sanitize: false, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
+                    } else if (textFormatting === 'pro') {
                         notifyText = marked(notifyText, {sanitize: false, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
                     }
                     notifyText = utils.replaceHtmlEntities(notifyText);
