@@ -16,7 +16,7 @@ var config = {
     RequireInviteNames: false,
     AllowSignupDomainsWizard: false,
 
-    // Level of text formatting, none, basic, pro (pro == markdown, currently not implemented)
+    // Level of text formatting, basic or pro (pro == markdown, currently not implemented).  Leave blank for no formatting.
     TextFormatting: "basic",
 
     // Google Developer Key (for Youtube API links)

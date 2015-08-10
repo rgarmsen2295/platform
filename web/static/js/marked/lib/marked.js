@@ -455,7 +455,7 @@ var inline = {
   link: /^!?\[(inside)\]\(href\)/,
   reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
   nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
-  strong: /^\*([\s\S]+?)\*/, //strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
+  strong: /^\*((?:\*\*|[\s\S])+?)\*/, //strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
   em: /^\b_((?:[^_]|__)+?)_\b/, //em: /^\b_((?:[^_]|__)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
   code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
   br: /^ {2,}\n(?!\s*$)/,
@@ -568,11 +568,11 @@ InlineLexer.prototype.output = function(src) {
 
   while (src) {
     // escape
-    /*if (cap = this.rules.escape.exec(src)) {
+    if (cap = this.rules.escape.exec(src)) {
       src = src.substring(cap[0].length);
       out += cap[1];
       continue;
-    }*/
+    }
 
     // autolink
     /*if (cap = this.rules.autolink.exec(src)) {

@@ -525,6 +525,8 @@ module.exports.textToJsx = function(text, options) {
     }
 
     var inner = [];
+    var codeFlag = false;
+    var codeString = '';
 
     // Function specific regex
     var hashRegex = /^href="#[^"]+"|(#[A-Za-z]+[A-Za-z0-9_\-]*[A-Za-z0-9])$/g;
@@ -567,7 +569,16 @@ module.exports.textToJsx = function(text, options) {
                 highlightSearchClass = " search-highlight";
             }
 
-            if (explicitMention &&
+            if (useTextFormatting && (codeFlag || word.indexOf('<code>') !== -1)) {
+                codeString += word + ' ';
+                codeFlag = true;
+
+                if (word.indexOf('</code>') !== -1) {
+                    inner.push(<span key={word+i+z+"_span"} className={highlightSearchClass} dangerouslySetInnerHTML={{__html: codeString}} />);
+                    codeString = '';
+                    codeFlag = false;
+                }
+            } else if (explicitMention &&
                 (UserStore.getProfileByUsername(explicitMention[1]) ||
                 Constants.SPECIAL_MENTIONS.indexOf(explicitMention[1]) !== -1))
             {
@@ -643,7 +654,7 @@ module.exports.textToJsx = function(text, options) {
                 // if word is empty dont include a span
             } else {
                 if (useTextFormatting)
-                    inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass} dangerouslySetInnerHTML={{__html: word}} /> </span>);
+                    inner.push(<span key={word+i+z+"_span"} className={highlightSearchClass} dangerouslySetInnerHTML={{__html: word + ' '}} />);
                 else
                     inner.push(<span key={word+i+z+"_span"}><span className={highlightSearchClass}>{module.exports.replaceHtmlEntities(word)}</span> </span>);
             }
