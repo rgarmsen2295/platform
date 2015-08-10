@@ -299,7 +299,7 @@ inline.pedantic = merge({}, inline.normal, {
 inline.gfm = merge({}, inline.normal, {
   escape: replace(inline.escape)('])', '~|])')(),
   url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
-  del: /^~~(?=\S)([\s\S]*?\S)~~/,
+  del: /^~(?=\S)([\s\S]*?\S)~/,
   text: replace(inline.text)
     (']|', '~]|')
     ('|', '|https?://|')
@@ -401,6 +401,13 @@ InlineLexer.prototype.output = function(src) {
     if (cap = this.rules.br.exec(src)) {
       src = src.substring(cap[0].length);
       out += this.renderer.br();
+      continue;
+    }
+
+    // del (gfm)
+    if (cap = this.rules.del.exec(src)) {
+      src = src.substring(cap[0].length);
+      out += this.renderer.del(this.output(cap[1]));
       continue;
     }
 

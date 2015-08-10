@@ -208,7 +208,7 @@ module.exports = React.createClass({
 
         var extraInfo = <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />;
         if (this.state.messageText.split(' ').length > 1 && allowTextFormatting) {
-            extraInfo = <span className='msg-format-help'>_<em>italics</em>_ *<strong>bold</strong>* `<code className='code-info'>code</code>` ```<samp className='preformatted-info'>preformatted</samp>```</span>;
+            extraInfo = <span className='msg-format-help'>_<em>italics</em>_ *<strong>bold</strong>* ~<s>strikethrough</s>~ `<code className='code-info'>code</code>`</span>;
         }
 
         return (

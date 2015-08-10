@@ -452,11 +452,8 @@ module.exports.customMarkedRenderer = function(options) {
         customTextRenderer.listitem = function(text) {
             return text + ' ';
         };
-        customTextRenderer.br = function() {
-            return '\n';
-        };
         customTextRenderer.del = function(text) {
-            return text;
+            return '<s>' + text + '</s>';
         };
         customTextRenderer.link = function(href, title, text) {
             return href;
