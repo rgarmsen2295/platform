@@ -4,8 +4,7 @@
 var FileAttachmentList = require('./file_attachment_list.jsx');
 var UserStore = require('../stores/user_store.jsx');
 var utils = require('../utils/utils.jsx');
-var marked = require('marked');
-var basicMarked = require('../../static/js/marked/lib/marked.js');
+var formatText = require('../../static/js/marked/lib/marked.js');
 
 module.exports = React.createClass({
     componentWillReceiveProps: function(nextProps) {
@@ -21,7 +20,7 @@ module.exports = React.createClass({
         var filenames = this.props.post.filenames;
         var parentPost = this.props.parentPost;
         var inner = utils.textToJsx(this.state.message);
-        var textFormatting = config.TextFormatting;
+        var allowTextFormatting = config.AllowTextFormatting;
 
         var comment = "";
         var reply = "";
@@ -53,13 +52,8 @@ module.exports = React.createClass({
                 }
             }
 
-            if (textFormatting) {
-                /* Remove || options.pro to support pro level */
-                if (textFormatting === 'basic' || textFormatting === 'pro') {
-                    message = basicMarked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
-                } else if (textFormatting === 'pro') {
-                    message = marked(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
-                }
+            if (allowTextFormatting) {
+                message = formatText(message, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: utils.customMarkedRenderer({disable: true})});
                 comment = (
                     <p className="post-link">
                         <span>Commented on {name}{apostrophe} message: <a className="theme" onClick={this.props.handleCommentClick} dangerouslySetInnerHTML={{__html: message}} /></span>
@@ -84,7 +78,7 @@ module.exports = React.createClass({
         return (
             <div className="post-body">
                 { comment }
-                {textFormatting ?
+                {allowTextFormatting ?
                 <div key={post.id+"_message"} className={postClass}><span>{inner}</span></div>
                 :
                 <p key={post.id+"_message"} className={postClass}><span>{inner}</span></p>

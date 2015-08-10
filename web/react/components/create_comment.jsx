@@ -190,7 +190,7 @@ module.exports = React.createClass({
         return numToUpload;
     },
     render: function() {
-        var textFormatting = config.TextFormatting;
+        var allowTextFormatting = config.AllowTextFormatting;
 
         var server_error = this.state.server_error ? <div className='form-group has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
         var post_error = this.state.post_error ? <label className='control-label'>{this.state.post_error}</label> : null;
@@ -207,13 +207,8 @@ module.exports = React.createClass({
         }
 
         var extraInfo = <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />;
-        if (this.state.messageText.split(' ').length > 1 && textFormatting) {
-            /* Remove || options.pro to support pro level */
-            if (textFormatting === 'basic' || textFormatting === 'pro') {
-                extraInfo = <div className={'comment-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
-            } else if (textFormatting === 'pro') {
-                extraInfo = <div className={'comment-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
-            }
+        if (this.state.messageText.split(' ').length > 1 && allowTextFormatting) {
+            extraInfo = <span className='msg-format-help'>_<em>italics</em>_ *<strong>bold</strong>* `<code className='code-info'>code</code>` ```<samp className='preformatted-info'>preformatted</samp>```</span>;
         }
 
         return (

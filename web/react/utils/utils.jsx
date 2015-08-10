@@ -9,8 +9,7 @@ var ActionTypes = Constants.ActionTypes;
 var AsyncClient = require('./async_client.jsx');
 var client = require('./client.jsx');
 var Autolinker = require('autolinker');
-var marked = require('marked');
-var basicMarked = require('../../static/js/marked/lib/marked.js');
+var formatText = require('../../static/js/marked/lib/marked.js');
 
 module.exports.isEmail = function(email) {
   var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
@@ -390,106 +389,83 @@ module.exports.searchForTerm = function(term) {
       - disable: Parses out *'s and other format specifiers in the text, but doesn't convert to html
 */
 module.exports.customMarkedRenderer = function(options) {
-    var customMarkedRenderer = new marked.Renderer();
-    if (options) {
-        if (options.disable) {
-            customMarkedRenderer.heading = function(text, level) {
-                return text;
-            };
-            customMarkedRenderer.hr = function() {
-                return '\n';
-            };
-            customMarkedRenderer.code = function(code, language) {
-                return code;
-            };
-            customMarkedRenderer.blockquote = function(quote) {
-                return quote;
-            };
-            customMarkedRenderer.list = function(body, ordered) {
-                return body;
-            };
-            customMarkedRenderer.listitem = function(text) {
-                return text + ' ';
-            };
-            customMarkedRenderer.paragraph = function(text) {
-                return text + ' ';
-            };
-            customMarkedRenderer.strong = function(text) {
-                return text;
-            };
-            customMarkedRenderer.em = function(text) {
-                return text;
-            };
-            customMarkedRenderer.br = function() {
-                return '\n';
-            };
-            customMarkedRenderer.del = function(text) {
-                return text;
-            };
-            customMarkedRenderer.codespan = function(code) {
-                return code;
-            };
-            customMarkedRenderer.link = function(href, title, text) {
-                return href;
-            };
-            customMarkedRenderer.image = function(href, title, text) {
-                return href;
-            };
-        } else if (options.basic || options.pro) { /* Remove || options.pro to support pro level */
-            customMarkedRenderer = new basicMarked.Renderer();
-            customMarkedRenderer.heading = function(text, level) {
-                return text;
-            };
-            customMarkedRenderer.hr = function() {
-                return '\n';
-            };
-            customMarkedRenderer.code = function(code, language) {
-                return code;
-            };
-            customMarkedRenderer.blockquote = function(quote) {
-                return quote;
-            };
-            customMarkedRenderer.list = function(body, ordered) {
-                return body;
-            };
-            customMarkedRenderer.listitem = function(text) {
-                return text + ' ';
-            };
-            customMarkedRenderer.br = function() {
-                return '\n';
-            };
-            customMarkedRenderer.del = function(text) {
-                return text;
-            };
-            customMarkedRenderer.link = function(href, title, text) {
-                return href;
-            };
-            customMarkedRenderer.image = function(href, title, text) {
-                return href;
-            };
-        } else if (options.pro) {
-            customMarkedRenderer = new marked.Renderer();
-            customMarkedRenderer.heading = function(text, level) {
-                return '<h' + level + '>' + text + '</h' + level + '>';
-            };
-            customMarkedRenderer.code = function(code, language) {
-                return '<pre>' + code + '</pre>';
-            };
-            customMarkedRenderer.codespan = function(code) {
-                return '<pre>' + code + '</pre>';
-            };
-            customMarkedRenderer.del = function(text) {
-                return '<s>' + text + '</s>';
-            };
-            customMarkedRenderer.link = function(href, title, text) {
-                return href;
-            };
-            customMarkedRenderer.image = function(href, title, text) {
-                return href;
-            };
-        }
+    var customTextRenderer = new formatText.Renderer();
+    if (options && options.disable) {
+        customTextRenderer.heading = function(text, level) {
+            return text;
+        };
+        customTextRenderer.hr = function() {
+            return '\n';
+        };
+        customTextRenderer.code = function(code, language) {
+            return code;
+        };
+        customTextRenderer.blockquote = function(quote) {
+            return quote;
+        };
+        customTextRenderer.list = function(body, ordered) {
+            return body;
+        };
+        customTextRenderer.listitem = function(text) {
+            return text + ' ';
+        };
+        customTextRenderer.paragraph = function(text) {
+            return text + ' ';
+        };
+        customTextRenderer.strong = function(text) {
+            return text;
+        };
+        customTextRenderer.em = function(text) {
+            return text;
+        };
+        customTextRenderer.br = function() {
+            return '\n';
+        };
+        customTextRenderer.del = function(text) {
+            return text;
+        };
+        customTextRenderer.codespan = function(code) {
+            return code;
+        };
+        customTextRenderer.link = function(href, title, text) {
+            return href;
+        };
+        customTextRenderer.image = function(href, title, text) {
+            return href;
+        };
+    } else {
+        customTextRenderer.heading = function(text, level) {
+            return text;
+        };
+        customTextRenderer.hr = function() {
+            return '\n';
+        };
+        /*customTextRenderer.code = function(code, language) {
+            return '<pre>' + code + '</pre>';
+        };*/
+        customTextRenderer.blockquote = function(quote) {
+            return quote;
+        };
+        customTextRenderer.list = function(body, ordered) {
+            return body;
+        };
+        customTextRenderer.listitem = function(text) {
+            return text + ' ';
+        };
+        customTextRenderer.br = function() {
+            return '\n';
+        };
+        customTextRenderer.del = function(text) {
+            return text;
+        };
+        customTextRenderer.link = function(href, title, text) {
+            return href;
+        };
+        customTextRenderer.image = function(href, title, text) {
+            return href;
+        };
     }
-    return customMarkedRenderer;
+    return customTextRenderer;
 };
 
 var oldExplicitMentionRegex = /(?:<mention>)([\s\S]*?)(?:<\/mention>)/g;
@@ -499,14 +475,10 @@ var startTagRegex = /(<\s*\w.*?>)+/g;
 var endTagRegex = /(<\s*\/\s*\w\s*.*?>|<\s*br\s*>)+/g;
 
 module.exports.textToJsx = function(text, options) {
-    var textFormatting = config.TextFormatting;
-    var useTextFormatting = textFormatting && (!options || !options.noTextFormatting);
+    var useTextFormatting = config.AllowTextFormatting && (!options || !options.noTextFormatting);
 
-    /* Remove || options.pro to support pro level */
-    if (useTextFormatting && (textFormatting === 'basic' || textFormatting === 'pro')) {
-        text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({basic: true})});
-    } else if (useTextFormatting && textFormatting === 'pro') {
-        text = basicMarked(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer({pro: true})});
+    if (useTextFormatting) {
+        text = formatText(text, {sanitize: true, mangle: false, gfm: true, breaks: true, tables: false, smartypants: true, renderer: module.exports.customMarkedRenderer()});
     }
 
     if (options && options['singleline']) {
