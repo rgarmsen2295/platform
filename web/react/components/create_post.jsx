@@ -251,13 +251,13 @@ module.exports = React.createClass({
             );
         }
 
-        var textFormattingHelp = <div><br /></div>;
+        var extraInfo = <MsgTyping channelId={this.state.channel_id} parentId=""/>;
         if (this.state.messageText.split(' ').length > 1 && textFormatting) {
             /* Remove || options.pro to support pro level */
             if (textFormatting === 'basic' || textFormatting === 'pro') {
-                textFormattingHelp = <div className={'post-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
+                extraInfo = <div className={'post-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
             } else if (textFormatting === 'pro') {
-                textFormattingHelp = <div className={'post-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
+                extraInfo = <div className={'post-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
             }
         }
 
@@ -283,8 +283,7 @@ module.exports = React.createClass({
                         { server_error }
                         { limit_error }
                         { preview }
-                        <MsgTyping channelId={this.state.channel_id} parentId=""/>
-                        {textFormattingHelp}
+                        {extraInfo}
                     </div>
                 </div>
             </form>

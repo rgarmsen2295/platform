@@ -206,13 +206,13 @@ module.exports = React.createClass({
             );
         }
 
-        var textFormattingHelp = <div><br /></div>;
+        var extraInfo = <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />;
         if (this.state.messageText.split(' ').length > 1 && textFormatting) {
             /* Remove || options.pro to support pro level */
             if (textFormatting === 'basic' || textFormatting === 'pro') {
-                textFormattingHelp = <div className={'comment-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
+                extraInfo = <div className={'comment-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
             } else if (textFormatting === 'pro') {
-                textFormattingHelp = <div className={'comment-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
+                extraInfo = <div className={'comment-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
             }
         }
 
@@ -233,8 +233,7 @@ module.exports = React.createClass({
                             onFileUpload={this.handleFileUpload}
                             onUploadError={this.handleUploadError} />
                     </div>
-                    <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />
-                    {textFormattingHelp}
+                    {extraInfo}
                     <div className={post_error ? 'has-error' : 'post-create-footer'}>
                         <input type="button" className="btn btn-primary comment-btn pull-right" value="Add Comment" onClick={this.handleSubmit} />
                         { post_error }
