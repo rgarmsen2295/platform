@@ -12,7 +12,7 @@
 
 var block = {
   newline: /^\n+/,
-  code: /^(```+)\s*([\s\S]*?[^```])\s*\1(?!```)/, // /^( {4}[^\n]+\n*)+/,
+  code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
   fences: noop,
   hr: /^( *[-*_]){3,} *(?:\n+|$)/,
   heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
@@ -168,25 +168,6 @@ Lexer.prototype.token = function(src, top, bq) {
           type: 'space'
         });
       }
-    }
-
-    // code
-    if (cap = this.rules.code.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'code',
-        text: cap[2]
-      });
-
-      /*src = src.substring(cap[0].length);
-      cap = cap[0].replace(/^ {4}/gm, '');
-      this.tokens.push({
-        type: 'code',
-        text: !this.options.pedantic
-          ? cap.replace(/\n+$/, '')
-          : cap
-      });
-      continue;*/
     }
 
     // def
@@ -376,6 +357,22 @@ InlineLexer.prototype.output = function(src) {
       continue;
     }
 
+    // autolink
+    if (cap = this.rules.autolink.exec(src)) {
+      src = src.substring(cap[0].length);
+      if (cap[2] === '@') {
+        text = cap[1].charAt(6) === ':'
+          ? this.mangle(cap[1].substring(7))
+          : this.mangle(cap[1]);
+        href = text;
+      } else {
+        text = escape(cap[1]);
+        href = text;
+      }
+      out += this.renderer.link(href, null, text);
+      continue;
+    }
+
     // strong
     if (cap = this.rules.strong.exec(src)) {
       src = src.substring(cap[0].length);
@@ -401,13 +398,6 @@ InlineLexer.prototype.output = function(src) {
     if (cap = this.rules.br.exec(src)) {
       src = src.substring(cap[0].length);
       out += this.renderer.br();
-      continue;
-    }
-
-    // del (gfm)
-    if (cap = this.rules.del.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.del(this.output(cap[1]));
       continue;
     }
 

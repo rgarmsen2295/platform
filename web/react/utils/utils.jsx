@@ -434,27 +434,6 @@ module.exports.customMarkedRenderer = function(options) {
             return href;
         };
     } else {
-        customTextRenderer.heading = function(text, level) {
-            return text;
-        };
-        customTextRenderer.hr = function() {
-            return '\n';
-        };
-        /*customTextRenderer.code = function(code, language) {
-            return '<pre>' + code + '</pre>';
-        };*/
-        customTextRenderer.blockquote = function(quote) {
-            return quote;
-        };
-        customTextRenderer.list = function(body, ordered) {
-            return body;
-        };
-        customTextRenderer.listitem = function(text) {
-            return text + ' ';
-        };
-        customTextRenderer.del = function(text) {
-            return '<s>' + text + '</s>';
-        };
         customTextRenderer.link = function(href, title, text) {
             return href;
         };

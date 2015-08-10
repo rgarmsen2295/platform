@@ -101,7 +101,7 @@ RootPost = React.createClass({
                         </li>
                     </ul>
                     <div className="post-body">
-                        <p>{message}</p>
+                        <div>{message}</div>
                         { post.filenames && post.filenames.length > 0 ?
                             <FileAttachmentList
                                 filenames={post.filenames}
