@@ -251,6 +251,16 @@ module.exports = React.createClass({
             );
         }
 
+        var textFormattingHelp = <div><br /></div>;
+        if (this.state.messageText.split(' ').length > 1 && textFormatting) {
+            /* Remove || options.pro to support pro level */
+            if (textFormatting === 'basic' || textFormatting === 'pro') {
+                textFormattingHelp = <div className={'post-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
+            } else if (textFormatting === 'pro') {
+                textFormattingHelp = <div className={'post-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
+            }
+        }
+
         return (
             <form id="create_post" ref="topDiv" role="form" onSubmit={this.handleSubmit}>
                 <div className="post-create">
@@ -274,11 +284,7 @@ module.exports = React.createClass({
                         { limit_error }
                         { preview }
                         <MsgTyping channelId={this.state.channel_id} parentId=""/>
-                        { this.state.messageText.split(" ").length > 1 && textFormatting ?
-                        <div className={"post-markdown-info"}>_<em>italics</em>_ **<strong>bold</strong>** **<strong>bold and _<em>italic</em>_ words</strong>** <a href="https://help.github.com/articles/markdown-basics/">Click here for more...</a></div>
-                        :
-                        <div><br /></div>
-                        }
+                        {textFormattingHelp}
                     </div>
                 </div>
             </form>

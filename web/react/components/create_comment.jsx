@@ -206,6 +206,16 @@ module.exports = React.createClass({
             );
         }
 
+        var textFormattingHelp = <div><br /></div>;
+        if (this.state.messageText.split(' ').length > 1 && textFormatting) {
+            /* Remove || options.pro to support pro level */
+            if (textFormatting === 'basic' || textFormatting === 'pro') {
+                textFormattingHelp = <div className={'comment-markdown-info'}>_<em>italics</em>_ *<strong>bold</strong>* `<code>code</code>`</div>;
+            } else if (textFormatting === 'pro') {
+                textFormattingHelp = <div className={'comment-markdown-info'}>_<em>italics</em>_ **<strong>bold</strong>** `<code>code</code>`</div>;
+            }
+        }
+
         return (
             <form onSubmit={this.handleSubmit}>
                 <div className="post-create">
@@ -224,11 +234,7 @@ module.exports = React.createClass({
                             onUploadError={this.handleUploadError} />
                     </div>
                     <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />
-                    { this.state.messageText.split(" ").length > 1 && textFormatting ?
-                    <div className={"comment-markdown-info"}>_<em>italics</em>_ **<strong>bold</strong>** <a href="https://help.github.com/articles/markdown-basics/">Click here for more...</a></div>
-                    :
-                    <br />
-                    }
+                    {textFormattingHelp}
                     <div className={post_error ? 'has-error' : 'post-create-footer'}>
                         <input type="button" className="btn btn-primary comment-btn pull-right" value="Add Comment" onClick={this.handleSubmit} />
                         { post_error }
