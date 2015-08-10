@@ -391,24 +391,6 @@ module.exports.searchForTerm = function(term) {
 module.exports.customMarkedRenderer = function(options) {
     var customTextRenderer = new formatText.Renderer();
     if (options && options.disable) {
-        customTextRenderer.heading = function(text, level) {
-            return text;
-        };
-        customTextRenderer.hr = function() {
-            return '\n';
-        };
-        customTextRenderer.code = function(code, language) {
-            return code;
-        };
-        customTextRenderer.blockquote = function(quote) {
-            return quote;
-        };
-        customTextRenderer.list = function(body, ordered) {
-            return body;
-        };
-        customTextRenderer.listitem = function(text) {
-            return text + ' ';
-        };
         customTextRenderer.paragraph = function(text) {
             return text + ' ';
         };
@@ -416,12 +398,6 @@ module.exports.customMarkedRenderer = function(options) {
             return text;
         };
         customTextRenderer.em = function(text) {
-            return text;
-        };
-        customTextRenderer.br = function() {
-            return '\n';
-        };
-        customTextRenderer.del = function(text) {
             return text;
         };
         customTextRenderer.codespan = function(code) {
