@@ -56,6 +56,7 @@ RhsHeaderPost = React.createClass({
 
 RootPost = React.createClass({
     render: function() {
+        var allowTextFormatting = config.AllowTextFormatting;
         var post = this.props.post;
         var message = utils.textToJsx(post.message);
         var isOwner = UserStore.getCurrentId() == post.user_id;
@@ -74,6 +75,11 @@ RootPost = React.createClass({
 
         if (channel) {
             channelName = (channel.type === 'D') ? "Private Message" : channel.display_name;
+        }
+
+        var messageHolder = <p>{message}</p>;
+        if (allowTextFormatting) {
+            messageHolder = <div>{message}</div>;
         }
 
         return (
@@ -101,7 +107,7 @@ RootPost = React.createClass({
                         </li>
                     </ul>
                     <div className="post-body">
-                        <div>{message}</div>
+                        {messageHolder}
                         { post.filenames && post.filenames.length > 0 ?
                             <FileAttachmentList
                                 filenames={post.filenames}
@@ -119,6 +125,7 @@ RootPost = React.createClass({
 
 CommentPost = React.createClass({
     render: function() {
+        var allowTextFormatting = config.AllowTextFormatting;
         var post = this.props.post;
 
         var commentClass = "post";
@@ -137,6 +144,11 @@ CommentPost = React.createClass({
 
         var message = utils.textToJsx(post.message);
         var timestamp = UserStore.getCurrentUser().update_at;
+
+        var messageHolder = <p>{message}</p>;
+        if (allowTextFormatting) {
+            messageHolder = <div>{message}</div>;
+        }
 
         return (
             <div className={commentClass + " " + currentUserCss}>
@@ -160,7 +172,7 @@ CommentPost = React.createClass({
                         </li>
                     </ul>
                     <div className="post-body">
-                        <div>{message}</div>
+                        {messageHolder}
                         { post.filenames && post.filenames.length > 0 ?
                             <FileAttachmentList
                                 filenames={post.filenames}
