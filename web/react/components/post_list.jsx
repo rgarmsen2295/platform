@@ -28,13 +28,16 @@ function getStateFromStores() {
 
 module.exports = React.createClass({
     displayName: "PostList",
-    scrollPosition: 0,
-    preventScrollTrigger: false,
-    gotMorePosts: false,
-    oldScrollHeight: 0,
     oldZoom: 0,
-    scrolledToNew: false,
+    holdPosition: false,            // The default state is to scroll to the bottom on change
+                                    // This behavior should NOT be taken advantage of, always set this to the desired state
+
+    scrollHeightFromBottom: 0,      // This represents the distance from the container's scrollHeight
+                                    // and current scrollTop
+                                    // Based on equation scrollTop + scrollHeightFromBottom = scrollHeight
     componentDidMount: function() {
+
+        // Add CSS required to have the theme colors
         var user = UserStore.getCurrentUser();
         if (user.props && user.props.theme) {
             utils.changeCss('div.theme', 'background-color:'+user.props.theme+';');
@@ -55,44 +58,19 @@ module.exports = React.createClass({
             $('.team__header').addClass('theme--gray');
         }
 
+        // Start our Store listeners
         PostStore.addChangeListener(this._onChange);
         ChannelStore.addChangeListener(this._onChange);
         UserStore.addStatusesChangeListener(this._onTimeChange);
         SocketStore.addChangeListener(this._onSocketChange);
 
-        $(".post-list-holder-by-time").perfectScrollbar();
+        // Timeout exists for the DOM to fully render before making changes
+        setTimeout(this.scrollWindow, 1);
 
-        this.resize();
+        // Handle browser resizing
+        $(window).resize(this.onResize);
 
-        var post_holder = $(".post-list-holder-by-time")[0];
-        this.scrollPosition = $(post_holder).scrollTop() + $(post_holder).innerHeight();
-        this.oldScrollHeight = post_holder.scrollHeight;
-        this.oldZoom = (window.outerWidth - 8) / window.innerWidth;
-
-        var self = this;
-        $(window).resize(function(){
-            $(post_holder).perfectScrollbar('update');
-
-            // this only kind of works, detecting zoom in browsers is a nightmare
-            var newZoom = (window.outerWidth - 8) / window.innerWidth;
-
-            if (self.scrollPosition >= post_holder.scrollHeight || (self.oldScrollHeight != post_holder.scrollHeight && self.scrollPosition >= self.oldScrollHeight) || self.oldZoom != newZoom) self.resize();
-
-            self.oldZoom = newZoom;
-
-            if ($('#create_post').length > 0) {
-                var height = $(window).height() - $('#create_post').height() - $('#error_bar').outerHeight() - 50;
-                $(".post-list-holder-by-time").css("height", height + "px");
-            }
-        });
-
-        $(post_holder).scroll(function(e){
-            if (!self.preventScrollTrigger) {
-                self.scrollPosition = $(post_holder).scrollTop() + $(post_holder).innerHeight();
-            }
-            self.preventScrollTrigger = false;
-        });
-
+        // Highlight stylingx
         $('body').on('click.userpopover', function(e){
             if ($(e.target).attr('data-toggle') !== 'popover'
                 && $(e.target).parents('.popover.in').length === 0) {
@@ -124,13 +102,12 @@ module.exports = React.createClass({
                 $(this).parent('div').next('.date-separator, .new-separator').removeClass('hovered--comment');
             }
         });
-
+    },
+    componentWillUpdate: function() {
+        this.prepareScrollWindow();
     },
     componentDidUpdate: function() {
-        this.resize();
-        var post_holder = $(".post-list-holder-by-time")[0];
-        this.scrollPosition = $(post_holder).scrollTop() + $(post_holder).innerHeight();
-        this.oldScrollHeight = post_holder.scrollHeight;
+        this.scrollWindow();
         $('.post-list__content div .post').removeClass('post--last');
         $('.post-list__content div:last-child .post').addClass('post--last');
     },
@@ -141,34 +118,40 @@ module.exports = React.createClass({
         SocketStore.removeChangeListener(this._onSocketChange);
         $('body').off('click.userpopover');
     },
-    resize: function() {
-        var post_holder = $(".post-list-holder-by-time")[0];
-        this.preventScrollTrigger = true;
-        if (this.gotMorePosts) {
-            this.gotMorePosts = false;
-            $(post_holder).scrollTop($(post_holder).scrollTop() + (post_holder.scrollHeight-this.oldScrollHeight) );
-        } else {
-            if ($("#new_message")[0] && !this.scrolledToNew) {
-                $(post_holder).scrollTop($(post_holder).scrollTop() + $("#new_message").offset().top - 63);
-                this.scrolledToNew = true;
-            } else {
-                $(post_holder).scrollTop(post_holder.scrollHeight);
-            }
+    prepareScrollWindow: function() {
+        var container = $('.post-list-holder-by-time');
+        if (this.holdPosition) {
+            this.scrollHeightFromBottom = container[0].scrollHeight - container.scrollTop();
         }
-        $(post_holder).perfectScrollbar('update');
+    },
+    scrollWindow: function() {
+        var container = $('.post-list-holder-by-time');
+
+        // If there's a new message, jump the window to it
+        // If there's no new message, we check if there is a scroll position to retrieve from the previous state
+        // If we don't, then we just jump to the bottom
+        if ($('#new_message').length) {
+            container.scrollTop(container.scrollTop() + $('#new_message').offset().top - container.offset().top - $('.new-separator').height());
+        } else if (this.holdPosition) {
+            container.scrollTop(container[0].scrollHeight - this.scrollHeightFromBottom);
+        } else {
+            container.scrollTop(container[0].scrollHeight - container.innerHeight());
+        }
+        this.holdPosition = false;
+    },
+    onResize: function() {
+        this.holdPosition = true;
+        if ($('#create_post').length > 0) {
+            var height = $(window).height() - $('#create_post').height() - $('#error_bar').outerHeight() - 50;
+            $(".post-list-holder-by-time").css("height", height + "px");
+        }
+        this.forceUpdate();
     },
     _onChange: function() {
         var newState = getStateFromStores();
 
         if (!utils.areStatesEqual(newState, this.state)) {
-            if (this.state.post_list && this.state.post_list.order) {
-                if (this.state.channel.id === newState.channel.id && this.state.post_list.order.length != newState.post_list.order.length && newState.post_list.order.length > Constants.POST_CHUNK_SIZE) {
-                    this.gotMorePosts = true;
-                }
-            }
-            if (this.state.channel.id !== newState.channel.id) {
-                this.scrolledToNew = false;
-            }
+            this.holdPosition = (newState.channel.id === this.state.channel.id); // If we're on a new channel, go to the bottom, otherwise hold your position
             this.setState(newState);
         }
     },
@@ -185,8 +168,11 @@ module.exports = React.createClass({
             }
 
             if (this.state.channel.id === msg.channel_id) {
+                this.holdPosition = false;
                 this.setState({ post_list: post_list });
-            };
+            } else {
+                this.holdPosition = true;
+            }
 
             PostStore.storePosts(post.channel_id, post_list);
         } else if (msg.action == "post_edited") {
@@ -199,6 +185,8 @@ module.exports = React.createClass({
 
                 post_list.posts[post.id] = post;
                 this.setState({ post_list: post_list });
+
+                this.holdPosition = true;
 
                 PostStore.storePosts(msg.channel_id, post_list);
             } else {
@@ -215,6 +203,8 @@ module.exports = React.createClass({
                 delete post_list.posts[msg.props.post_id];
                 var index = post_list.order.indexOf(msg.props.post_id);
                 if (index > -1) post_list.order.splice(index, 1);
+
+                this.holdPosition = true;
 
                 this.setState({ post_list: post_list });
 
@@ -249,7 +239,7 @@ module.exports = React.createClass({
         $(this.refs.loadmore.getDOMNode()).text("Retrieving more messages...");
 
         var self = this;
-        var currentPos = $(".post-list").scrollTop;
+        this.holdPosition = true;
 
         Client.getPosts(
                 channel_id,
@@ -273,7 +263,6 @@ module.exports = React.createClass({
                     });
 
                     Client.getProfiles();
-                    $(".post-list").scrollTop(currentPos);
                 },
                 function(err) {
                     $(self.refs.loadmore.getDOMNode()).text("Load more messages");
@@ -439,7 +428,7 @@ module.exports = React.createClass({
                 currentPostDay = utils.getDateForUnixTicks(post.create_at);
                 if (currentPostDay.toDateString() != previousPostDay.toDateString()) {
                     postCtls.push(
-                        <div className="date-separator">
+                        <div key={currentPostDay.toDateString()} className="date-separator">
                             <hr className="separator__hr" />
                             <div className="separator__text">{currentPostDay.toDateString()}</div>
                         </div>
@@ -449,7 +438,7 @@ module.exports = React.createClass({
                 if (post.create_at > last_viewed && !rendered_last_viewed) {
                     rendered_last_viewed = true;
                     postCtls.push(
-                        <div className="new-separator">
+                        <div key="unviewed" className="new-separator">
                             <hr id="new_message" className="separator__hr" />
                             <div className="separator__text">New Messages</div>
                         </div>
