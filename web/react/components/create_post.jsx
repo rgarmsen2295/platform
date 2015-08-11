@@ -235,6 +235,7 @@ module.exports = React.createClass({
         return numToUpload;
     },
     render: function() {
+        var allowTextFormatting = config.AllowTextFormatting;
 
         var server_error = this.state.server_error ? <div className='has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
         var post_error = this.state.post_error ? <label className='control-label'>{this.state.post_error}</label> : null;
@@ -248,6 +249,11 @@ module.exports = React.createClass({
                     onRemove={this.removePreview}
                     uploadsInProgress={this.state.uploadsInProgress} />
             );
+        }
+
+        var extraInfo = <MsgTyping channelId={this.state.channel_id} parentId=""/>;
+        if (this.state.messageText.split(' ').length > 1 && allowTextFormatting) {
+            extraInfo = <span className='msg-typing'>_<em>italics</em>_ *<strong>bold</strong>* `<code className='code-info'>code</code>`</span>;
         }
 
         return (
@@ -272,7 +278,7 @@ module.exports = React.createClass({
                         { server_error }
                         { limit_error }
                         { preview }
-                        <MsgTyping channelId={this.state.channel_id} parentId=""/>
+                        {extraInfo}
                     </div>
                 </div>
             </form>

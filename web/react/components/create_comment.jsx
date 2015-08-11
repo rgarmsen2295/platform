@@ -190,6 +190,7 @@ module.exports = React.createClass({
         return numToUpload;
     },
     render: function() {
+        var allowTextFormatting = config.AllowTextFormatting;
 
         var server_error = this.state.server_error ? <div className='form-group has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
         var post_error = this.state.post_error ? <label className='control-label'>{this.state.post_error}</label> : null;
@@ -203,6 +204,11 @@ module.exports = React.createClass({
                     onRemove={this.removePreview}
                     uploadsInProgress={this.state.uploadsInProgress} />
             );
+        }
+
+        var extraInfo = <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />;
+        if (this.state.messageText.split(' ').length > 1 && allowTextFormatting) {
+            extraInfo = <span className='msg-format-help'>_<em>italics</em>_ *<strong>bold</strong>* `<code className='code-info'>code</code>`</span>;
         }
 
         return (
@@ -222,7 +228,7 @@ module.exports = React.createClass({
                             onFileUpload={this.handleFileUpload}
                             onUploadError={this.handleUploadError} />
                     </div>
-                    <MsgTyping channelId={this.props.channelId} parentId={this.props.rootId}  />
+                    {extraInfo}
                     <div className={post_error ? 'has-error' : 'post-create-footer'}>
                         <input type="button" className="btn btn-primary comment-btn pull-right" value="Add Comment" onClick={this.handleSubmit} />
                         { post_error }
