@@ -37,7 +37,7 @@ var isCallInProgress = function(callName) {
 
 module.exports.dispatchError = dispatchError;
 
-module.exports.getChannels = function(force, updateLastViewed, checkVersion) {
+module.exports.getChannels = function(force, updateLastViewed, checkVersion, callbackFunction) {
     if (isCallInProgress("getChannels")) return;
 
     if (ChannelStore.getAll().length == 0 || force) {
@@ -72,6 +72,9 @@ module.exports.getChannels = function(force, updateLastViewed, checkVersion) {
                     members: data.members
                 });
 
+                if (callbackFunction) {
+                    callbackFunction();
+                }
             },
             function(err) {
                 callTracker["getChannels"] = 0;

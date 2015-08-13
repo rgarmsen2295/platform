@@ -3,6 +3,7 @@
 
 var AppDispatcher = require('../dispatcher/app_dispatcher.jsx');
 var ChannelStore = require('../stores/channel_store.jsx');
+var Client = require('../utils/client.jsx');
 var AsyncClient = require('../utils/async_client.jsx');
 var SocketStore = require('../stores/socket_store.jsx');
 var UserStore = require('../stores/user_store.jsx');
@@ -346,15 +347,37 @@ module.exports = React.createClass({
 
             // set up click handler to switch channels (or create a new channel for non-existant ones)
             var clickHandler = null;
-            var href;
+            var href = '#';
             if (!channel.fake) {
                 clickHandler = function(e) {
                     e.preventDefault();
                     utils.switchChannel(channel);
                 };
-                href = '#';
             } else {
-                href = TeamStore.getCurrentTeamUrl() + '/channels/' + channel.name;
+                // It's a direct message channel that doesn't exist yet so let's create it
+                var ids = channel.name.split('__');
+                var otherUserId = '';
+                if (ids[0] === UserStore.getCurrentId()) {
+                    otherUserId = ids[1];
+                } else {
+                    otherUserId = ids[0];
+                }
+
+                clickHandler = function(e) {
+                    e.preventDefault();
+
+                    Client.createPMChannelIfNotExists(channel, otherUserId,
+                        function() {
+                            AsyncClient.getChannels(true, true, false, function() {
+                                var updatedChannel = ChannelStore.getByName(channel.name);
+                                utils.switchChannel(updatedChannel);
+                            });
+                        },
+                        function() {
+                            window.location.href = TeamStore.getCurrentTeamUrl() + '/channels/' + channel.name;
+                        }
+                    );
+                };
             }
 
             return (
