@@ -1244,40 +1244,48 @@ var GeneralTab = React.createClass({
 });
 
 var AppearanceTab = React.createClass({
+    displayName: 'UserSettingsAppearanceTab',
+    propTypes: {
+        updateSection: React.PropTypes.func,
+        updateTab: React.PropTypes.func,
+        activeSection: React.PropTypes.string
+    },
     submitTheme: function(e) {
         e.preventDefault();
         var user = UserStore.getCurrentUser();
-        if (!user.props) user.props = {};
+        if (!user.props) {
+            user.props = {};
+        }
         user.props.theme = this.state.theme;
 
         client.updateUser(user,
-            function(data) {
-                this.props.updateSection("");
+            function success() {
+                this.props.updateSection('');
                 window.location.reload();
             }.bind(this),
-            function(err) {
-                state = this.getInitialState();
-                state.server_error = err;
+            function error(err) {
+                var state = this.getInitialState();
+                state.serverError = err;
                 this.setState(state);
             }.bind(this)
         );
     },
     updateTheme: function(e) {
         var hex = utils.rgb2hex(e.target.style.backgroundColor);
-        this.setState({ theme: hex.toLowerCase() });
+        this.setState({theme: hex.toLowerCase()});
     },
     handleClose: function() {
-        this.setState({server_error: null});
+        this.setState({serverError: null});
         this.props.updateTab('general');
     },
     componentDidMount: function() {
-        if (this.props.activeSection === "theme") {
+        if (this.props.activeSection === 'theme') {
             $(this.refs[this.state.theme].getDOMNode()).addClass('active-border');
         }
         $('#user_settings').on('hidden.bs.modal', this.handleClose);
     },
     componentDidUpdate: function() {
-        if (this.props.activeSection === "theme") {
+        if (this.props.activeSection === 'theme') {
             $('.color-btn').removeClass('active-border');
             $(this.refs[this.state.theme].getDOMNode()).addClass('active-border');
         }
@@ -1288,52 +1296,67 @@ var AppearanceTab = React.createClass({
     },
     getInitialState: function() {
         var user = UserStore.getCurrentUser();
-        var theme = config.ThemeColors != null ? config.ThemeColors[0] : "#2389d7";
+        var theme = '#2389d7';
+        if (config.ThemeColors != null) {
+            theme = config.ThemeColors[0];
+        }
         if (user.props && user.props.theme) {
             theme = user.props.theme;
         }
-        return { theme: theme.toLowerCase() };
+        return {theme: theme.toLowerCase()};
     },
     render: function() {
-        var server_error = this.state.server_error ? this.state.server_error : null;
-
+        var serverError = null;
+        if (this.state.serverError) {
+            serverError = this.state.serverError;
+        }
 
         var themeSection;
         var self = this;
 
         if (config.ThemeColors != null) {
+            var handleUpdateThemeSection;
             if (this.props.activeSection === 'theme') {
-                var theme_buttons = [];
+                var themeButtons = [];
 
                 for (var i = 0; i < config.ThemeColors.length; i++) {
-                    theme_buttons.push(<button ref={config.ThemeColors[i]} type="button" className="btn btn-lg color-btn" style={{backgroundColor: config.ThemeColors[i]}} onClick={this.updateTheme} />);
+                    themeButtons.push(<button ref={config.ThemeColors[i]} type='button' className='btn btn-lg color-btn' style={{backgroundColor: config.ThemeColors[i]}} onClick={this.updateTheme} />);
                 }
 
                 var inputs = [];
 
                 inputs.push(
-                    <li className="setting-list-item">
-                        <div className="btn-group" data-toggle="buttons-radio">
-                            { theme_buttons }
+                    <li className='setting-list-item'>
+                        <div className='btn-group' data-toggle='buttons-radio'>
+                            {themeButtons}
                         </div>
                     </li>
                 );
 
+                handleUpdateThemeSection = function updateThemeSection(e) {
+                    self.props.updateSection('');
+                    e.preventDefault();
+                };
+
                 themeSection = (
                     <SettingItemMax
-                        title="Theme Color"
+                        title='Theme Color'
                         inputs={inputs}
                         submit={this.submitTheme}
-                        server_error={server_error}
-                        updateSection={function(e){self.props.updateSection("");e.preventDefault;}}
+                        server_error={serverError}
+                        updateSection={handleUpdateThemeSection}
                     />
                 );
             } else {
+                handleUpdateThemeSection = function updateThemeSection() {
+                    self.props.updateSection('theme');
+                };
+
                 themeSection = (
                     <SettingItemMin
-                        title="Theme Color"
+                        title='Theme Color'
                         describe={this.state.theme}
-                        updateSection={function(){self.props.updateSection("theme");}}
+                        updateSection={handleUpdateThemeSection}
                     />
                 );
             }
@@ -1341,15 +1364,15 @@ var AppearanceTab = React.createClass({
 
         return (
             <div>
-                <div className="modal-header">
-                    <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 className="modal-title" ref="title"><i className="modal-back"></i>Appearance Settings</h4>
+                <div className='modal-header'>
+                    <button type='button' className='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                    <h4 className='modal-title' ref='title'><i className='modal-back'></i>Appearance Settings</h4>
                 </div>
-                <div className="user-settings">
-                    <h3 className="tab-header">Appearance Settings</h3>
-                    <div className="divider-dark first"/>
+                <div className='user-settings'>
+                    <h3 className='tab-header'>Appearance Settings</h3>
+                    <div className='divider-dark first'/>
                     {themeSection}
-                    <div className="divider-dark"/>
+                    <div className='divider-dark'/>
                 </div>
             </div>
         );
