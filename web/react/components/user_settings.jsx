@@ -566,6 +566,13 @@ var NotificationsTab = React.createClass({
 });
 
 var SecurityTab = React.createClass({
+    displayName: 'UserSettingsSecurityTab',
+    propTypes: {
+        user: React.PropTypes.object,
+        updateSection: React.PropTypes.func,
+        updateTab: React.PropTypes.func,
+        activeSection: React.PropTypes.string
+    },
     submitPassword: function(e) {
         e.preventDefault();
 
@@ -595,12 +602,12 @@ var SecurityTab = React.createClass({
         data.new_password = newPassword;
 
         client.updatePassword(data,
-            function() {
+            function success() {
                 this.props.updateSection('');
                 AsyncClient.getMe();
                 this.setState({currentPassword: '', newPassword: '', confirmPassword: ''});
             }.bind(this),
-            function(err) {
+            function error(err) {
                 var state = this.getInitialState();
                 if (err.message) {
                     state.serverError = err.message;
@@ -623,14 +630,14 @@ var SecurityTab = React.createClass({
     },
     handleHistoryOpen: function() {
         this.setState({willReturn: true});
-        $("#user_settings").modal('hide');
+        $('#user_settings').modal('hide');
     },
     handleDevicesOpen: function() {
         this.setState({willReturn: true});
-        $("#user_settings").modal('hide');
+        $('#user_settings').modal('hide');
     },
     handleClose: function() {
-        $(this.getDOMNode()).find('.form-control').each(function() {
+        $(this.getDOMNode()).find('.form-control').each(function clearForms() {
             this.value = '';
         });
         this.setState({currentPassword: '', newPassword: '', confirmPassword: '', serverError: null, passwordError: null});
@@ -652,8 +659,15 @@ var SecurityTab = React.createClass({
         return {currentPassword: '', newPassword: '', confirmPassword: '', willReturn: false};
     },
     render: function() {
-        var serverError = this.state.serverError ? this.state.serverError : null;
-        var passwordError = this.state.passwordError ? this.state.passwordError : null;
+        var serverError = null;
+        if (this.state.serverError) {
+            serverError = this.state.serverError;
+        }
+
+        var passwordError = null;
+        if (this.state.passwordError) {
+            passwordError = this.state.passwordError;
+        }
 
         var updateSectionStatus;
         var passwordSection;
@@ -697,7 +711,7 @@ var SecurityTab = React.createClass({
                 );
             }
 
-            updateSectionStatus = function(e) {
+            updateSectionStatus = function handleUpdateSection(e) {
                 self.props.updateSection('');
                 self.setState({currentPassword: '', newPassword: '', confirmPassword: '', serverError: null, passwordError: null});
                 e.preventDefault();
@@ -717,15 +731,26 @@ var SecurityTab = React.createClass({
             var describe;
             if (this.props.user.auth_service === '') {
                 var d = new Date(this.props.user.last_password_update);
-                var hour = d.getHours() % 12 ? String(d.getHours() % 12) : '12';
-                var min = d.getMinutes() < 10 ? '0' + d.getMinutes() : String(d.getMinutes());
-                var timeOfDay = d.getHours() >= 12 ? ' pm' : ' am';
+                var hour = '12';
+                if (d.getHours() % 12) {
+                    hour = String(d.getHours() % 12);
+                }
+
+                var min = String(d.getMinutes());
+                if (d.getMinutes() < 10) {
+                    min = '0' + d.getMinutes();
+                }
+
+                var timeOfDay = ' am';
+                if (d.getHours() >= 12) {
+                    timeOfDay = ' pm';
+                }
                 describe = 'Last updated ' + Constants.MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + hour + ':' + min + timeOfDay;
             } else {
                 describe = 'Log in done through GitLab';
             }
 
-            updateSectionStatus = function() {
+            updateSectionStatus = function handleUpdateSection() {
                 self.props.updateSection('password');
             };
 
