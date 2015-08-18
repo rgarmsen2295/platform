@@ -284,20 +284,28 @@ var NotificationsTab = React.createClass({
         var handleUpdateSoundSection;
         var describeSound = '';
         if (this.props.activeSection === 'sound' && this.state.soundNeeded) {
-            var soundActive = ['', ''];
+            var soundActive = [false, false];
             if (this.state.enableSound === 'false') {
-                soundActive[1] = 'active';
+                soundActive[1] = true;
             } else {
-                soundActive[0] = 'active';
+                soundActive[0] = true;
             }
 
             inputs = [];
 
             inputs.push(
                 <div>
-                    <div className='btn-group' data-toggle='buttons-radio'>
-                        <button className={'btn btn-default ' + soundActive[0]} onClick={self.handleSoundRadio.bind(this, 'true')}>On</button>
-                        <button className={'btn btn-default ' + soundActive[1]} onClick={self.handleSoundRadio.bind(this, 'false')}>Off</button>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={soundActive[0]} onChange={self.handleSoundRadio.bind(this, 'true')}>On</input>
+                        </label>
+                        <br/>
+                    </div>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={soundActive[1]} onChange={self.handleSoundRadio.bind(this, 'false')}>Off</input>
+                        </label>
+                        <br/>
                     </div>
                 </div>
             );
@@ -343,20 +351,27 @@ var NotificationsTab = React.createClass({
         var handleUpdateEmailSection;
         var describeEmail = '';
         if (this.props.activeSection === 'email') {
-            var emailActive = ['', ''];
+            var emailActive = [false, false];
             if (this.state.enableEmail === 'false') {
-                emailActive[1] = 'active';
+                emailActive[1] = true;
             } else {
-                emailActive[0] = 'active';
+                emailActive[0] = true;
             }
 
             inputs.push(
                 <div>
-                    <div className='btn-group' data-toggle='buttons-radio'>
-                        <button className={'btn btn-default ' + emailActive[0]} onClick={self.handleEmailRadio.bind(this, 'true')}>On</button>
-                        <button className={'btn btn-default ' + emailActive[1]} onClick={self.handleEmailRadio.bind(this, 'false')}>Off</button>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={emailActive[0]} onChange={self.handleEmailRadio.bind(this, 'true')}>On</input>
+                        </label>
+                        <br/>
                     </div>
-                    <div><br/>{'Email notifications are sent for mentions and private messages after you have been away from ' + config.SiteName + ' for 5 minutes.'}</div>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={emailActive[1]} onChange={self.handleEmailRadio.bind(this, 'false')}>Off</input>
+                        </label>
+                        <br/>
+                    </div>
                 </div>
             );
 
