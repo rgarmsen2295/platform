@@ -103,10 +103,6 @@ module.exports = React.createClass({
         var describe = '';
         var inputs = [];
 
-        var handleAllClick;
-        var handleMentionClick;
-        var handleNoneClick;
-
         var handleUpdateSection;
 
         var desktopSection;
@@ -120,33 +116,23 @@ module.exports = React.createClass({
                 notifyActive[2] = true;
             }
 
-            handleAllClick = function allClick() {
-                self.handleRadioClick('all');
-            };
-            handleMentionClick = function mentionClick() {
-                self.handleRadioClick('mention');
-            };
-            handleNoneClick = function noneClick() {
-                self.handleRadioClick('none');
-            };
-
             inputs.push(
                 <div>
                     <div className='radio'>
                         <label>
-                            <input type='radio' checked={notifyActive[0]} onClick={handleAllClick}>For all activity</input>
+                            <input type='radio' checked={notifyActive[0]} onChange={self.handleRadioClick.bind(this, 'all')}>For all activity</input>
                         </label>
                         <br/>
                     </div>
                     <div className='radio'>
                         <label>
-                            <input type='radio' checked={notifyActive[1]} onClick={handleMentionClick}>Only for mentions</input>
+                            <input type='radio' checked={notifyActive[1]} onChange={self.handleRadioClick.bind(this, 'mention')}>Only for mentions</input>
                         </label>
                         <br/>
                     </div>
                     <div className='radio'>
                         <label>
-                            <input type='radio' checked={notifyActive[2]} onClick={handleNoneClick}>Never</input>
+                            <input type='radio' checked={notifyActive[2]} onChange={self.handleRadioClick.bind(this, 'none')}>Never</input>
                         </label>
                     </div>
                 </div>
@@ -192,18 +178,26 @@ module.exports = React.createClass({
 
         var quietSection;
         if (this.state.activeSection === 'quiet') {
-            var quietActive = ['', ''];
+            var quietActive = [false, false];
             if (this.state.quietMode) {
-                quietActive[0] = 'active';
+                quietActive[0] = true;
             } else {
-                quietActive[1] = 'active';
+                quietActive[1] = true;
             }
 
             inputs.push(
                 <div>
-                    <div className='btn-group' data-toggle='buttons-radio'>
-                        <button className={'btn btn-default ' + quietActive[0]} onClick={self.handleQuietToggle.bind(this, true)}>On</button>
-                        <button className={'btn btn-default ' + quietActive[1]} onClick={self.handleQuietToggle.bind(this, false)}>Off</button>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={quietActive[0]} onChange={self.handleQuietToggle.bind(this, true)}>On</input>
+                        </label>
+                        <br/>
+                    </div>
+                    <div className='radio'>
+                        <label>
+                            <input type='radio' checked={quietActive[1]} onChange={self.handleQuietToggle.bind(this, false)}>Off</input>
+                        </label>
+                        <br/>
                     </div>
                 </div>
             );
