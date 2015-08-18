@@ -785,6 +785,12 @@ var SecurityTab = React.createClass({
 });
 
 var GeneralTab = React.createClass({
+    displayName: 'UserSettingsGeneralTab',
+    propTypes: {
+        user: React.PropTypes.object,
+        activeSection: React.PropTypes.string,
+        updateSection: React.PropTypes.func
+    },
     submitActive: false,
     submitUsername: function(e) {
         e.preventDefault();
@@ -863,11 +869,11 @@ var GeneralTab = React.createClass({
     },
     submitUser: function(user) {
         client.updateUser(user,
-            function() {
+            function success() {
                 this.updateSection('');
                 AsyncClient.getMe();
             }.bind(this),
-            function(err) {
+            function error(err) {
                 var state = this.getInitialState();
                 if (err.message) {
                     state.serverError = err.message;
@@ -901,12 +907,12 @@ var GeneralTab = React.createClass({
         this.setState({loadingPicture: true});
 
         client.uploadProfileImage(formData,
-            function() {
+            function success() {
                 this.submitActive = false;
                 AsyncClient.getMe();
                 window.location.reload();
             }.bind(this),
-            function(err) {
+            function error(err) {
                 var state = this.getInitialState();
                 state.serverError = err;
                 this.setState(state);
@@ -944,7 +950,7 @@ var GeneralTab = React.createClass({
         this.props.updateSection(section);
     },
     handleClose: function() {
-        $(this.getDOMNode()).find('.form-control').each(function() {
+        $(this.getDOMNode()).find('.form-control').each(function clearForms() {
             this.value = '';
         });
 
@@ -983,6 +989,7 @@ var GeneralTab = React.createClass({
         var self = this;
         var inputs = [];
 
+        var handleUpdateNameSection;
         if (this.props.activeSection === 'name') {
             inputs.push(
                 <div className='form-group'>
@@ -1002,6 +1009,11 @@ var GeneralTab = React.createClass({
                 </div>
             );
 
+            handleUpdateNameSection = function updateNameSection(e) {
+                self.updateSection('');
+                e.preventDefault();
+            };
+
             nameSection = (
                 <SettingItemMax
                     title='Full Name'
@@ -1009,10 +1021,7 @@ var GeneralTab = React.createClass({
                     submit={this.submitName}
                     server_error={serverError}
                     client_error={clientError}
-                    updateSection={function(e) {
-                        self.updateSection('');
-                        e.preventDefault();
-                    }}
+                    updateSection={handleUpdateNameSection}
                 />
             );
         } else {
@@ -1026,27 +1035,39 @@ var GeneralTab = React.createClass({
                 fullName = user.last_name;
             }
 
+            handleUpdateNameSection = function updateNameSection() {
+                self.updateSection('name');
+            };
+
             nameSection = (
                 <SettingItemMin
                     title='Full Name'
                     describe={fullName}
-                    updateSection={function() {
-                        self.updateSection('name');
-                    }}
+                    updateSection={handleUpdateNameSection}
                 />
             );
         }
 
         var nicknameSection;
+        var handleUpdateNicknameSection;
         if (this.props.activeSection === 'nickname') {
+            var nicknameLabel = 'Nickname';
+            if (utils.isMobile()) {
+                nicknameLabel = '';
+            }
             inputs.push(
                 <div className='form-group'>
-                    <label className='col-sm-5 control-label'>{utils.isMobile() ? '' : 'Nickname'}</label>
+                    <label className='col-sm-5 control-label'>{nicknameLabel}</label>
                     <div className='col-sm-7'>
                         <input className='form-control' type='text' onChange={this.updateNickname} value={this.state.nickname}/>
                     </div>
                 </div>
             );
+
+            handleUpdateNicknameSection = function updateNicknameSection(e) {
+                self.updateSection('');
+                e.preventDefault();
+            };
 
             nicknameSection = (
                 <SettingItemMax
@@ -1055,34 +1076,43 @@ var GeneralTab = React.createClass({
                     submit={this.submitNickname}
                     server_error={serverError}
                     client_error={clientError}
-                    updateSection={function(e) {
-                        self.updateSection('');
-                        e.preventDefault();
-                    }}
+                    updateSection={handleUpdateNicknameSection}
                 />
             );
         } else {
+            handleUpdateNicknameSection = function updateNicknameSection() {
+                self.updateSection('nickname');
+            };
+
             nicknameSection = (
                 <SettingItemMin
                     title='Nickname'
                     describe={UserStore.getCurrentUser().nickname}
-                    updateSection={function() {
-                        self.updateSection('nickname');
-                    }}
+                    updateSection={handleUpdateNicknameSection}
                 />
             );
         }
 
         var usernameSection;
+        var handleUpdateUsernameSection;
         if (this.props.activeSection === 'username') {
+            var usernameLabel = 'Username';
+            if (utils.isMobile()) {
+                usernameLabel = '';
+            }
             inputs.push(
                 <div className='form-group'>
-                    <label className='col-sm-5 control-label'>{utils.isMobile() ? '' : 'Username'}</label>
+                    <label className='col-sm-5 control-label'>{usernameLabel}</label>
                     <div className='col-sm-7'>
                         <input className='form-control' type='text' onChange={this.updateUsername} value={this.state.username}/>
                     </div>
                 </div>
             );
+
+            handleUpdateUsernameSection = function updateUsernameSection(e) {
+                self.updateSection('');
+                e.preventDefault();
+            };
 
             usernameSection = (
                 <SettingItemMax
@@ -1091,24 +1121,24 @@ var GeneralTab = React.createClass({
                     submit={this.submitUsername}
                     server_error={serverError}
                     client_error={clientError}
-                    updateSection={function(e) {
-                        self.updateSection('');
-                        e.preventDefault();
-                    }}
+                    updateSection={handleUpdateUsernameSection}
                 />
             );
         } else {
+            handleUpdateUsernameSection = function updateUsernameSection() {
+                self.updateSection('username');
+            };
             usernameSection = (
                 <SettingItemMin
                     title='Username'
                     describe={UserStore.getCurrentUser().username}
-                    updateSection={function() {
-                        self.updateSection('username');
-                    }}
+                    updateSection={handleUpdateUsernameSection}
                 />
             );
         }
+
         var emailSection;
+        var handleUpdateEmailSection;
         if (this.props.activeSection === 'email') {
             inputs.push(
                 <div className='form-group'>
@@ -1119,6 +1149,11 @@ var GeneralTab = React.createClass({
                 </div>
             );
 
+            handleUpdateEmailSection = function updateEmailSection(e) {
+                self.updateSection('');
+                e.preventDefault();
+            };
+
             emailSection = (
                 <SettingItemMax
                     title='Email'
@@ -1126,26 +1161,31 @@ var GeneralTab = React.createClass({
                     submit={this.submitEmail}
                     server_error={serverError}
                     client_error={emailError}
-                    updateSection={function(e) {
-                        self.updateSection('');
-                        e.preventDefault();
-                    }}
+                    updateSection={handleUpdateEmailSection}
                 />
             );
         } else {
+            handleUpdateEmailSection = function updateEmailSection() {
+                self.updateSection('email');
+            };
+
             emailSection = (
                 <SettingItemMin
                     title='Email'
                     describe={UserStore.getCurrentUser().email}
-                    updateSection={function() {
-                        self.updateSection('email');
-                    }}
+                    updateSection={handleUpdateEmailSection}
                 />
             );
         }
 
         var pictureSection;
+        var handleUpdatePictureSection;
         if (this.props.activeSection === 'picture') {
+            handleUpdatePictureSection = function updatePictureSection(e) {
+                self.updateSection('');
+                e.preventDefault();
+            };
+
             pictureSection = (
                 <SettingPicture
                     title='Profile Picture'
@@ -1153,10 +1193,7 @@ var GeneralTab = React.createClass({
                     src={'/api/v1/users/' + user.id + '/image?time=' + user.last_picture_update}
                     server_error={serverError}
                     client_error={clientError}
-                    updateSection={function(e) {
-                        self.updateSection('');
-                        e.preventDefault();
-                    }}
+                    updateSection={handleUpdatePictureSection}
                     picture={this.state.picture}
                     pictureChange={this.updatePicture}
                     submitActive={this.submitActive}
@@ -1168,13 +1205,16 @@ var GeneralTab = React.createClass({
             if (user.last_picture_update) {
                 minMessage = 'Image last updated ' + utils.displayDate(user.last_picture_update);
             }
+
+            handleUpdatePictureSection = function updatePictureSection() {
+                self.updateSection('picture');
+            };
+
             pictureSection = (
                 <SettingItemMin
                     title='Profile Picture'
                     describe={minMessage}
-                    updateSection={function() {
-                        self.updateSection('picture');
-                    }}
+                    updateSection={handleUpdatePictureSection}
                 />
             );
         }
