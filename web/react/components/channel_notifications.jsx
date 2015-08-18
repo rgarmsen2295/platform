@@ -10,158 +10,200 @@ var UserStore = require('../stores/user_store.jsx');
 var ChannelStore = require('../stores/channel_store.jsx');
 
 module.exports = React.createClass({
+    displayName: 'ChannelNotifications',
     componentDidMount: function() {
-        ChannelStore.addChangeListener(this._onChange);
+        ChannelStore.addChangeListener(this.onListenerChange);
 
         var self = this;
-        $(this.refs.modal.getDOMNode()).on('show.bs.modal', function(e) {
+        $(this.refs.modal.getDOMNode()).on('show.bs.modal', function showModal(e) {
             var button = e.relatedTarget;
-            var channel_id = button.getAttribute('data-channelid');
+            var channelId = button.getAttribute('data-channelid');
 
-            var notifyLevel = ChannelStore.getMember(channel_id).notify_level;
+            var notifyLevel = ChannelStore.getMember(channelId).notify_level;
             var quietMode = false;
-            if (notifyLevel === "quiet") quietMode = true;
-            self.setState({ notify_level: notifyLevel, quiet_mode: quietMode, title: button.getAttribute('data-title'), channel_id: channel_id });
+
+            if (notifyLevel === 'quiet') {
+                quietMode = true;
+            }
+
+            self.setState({notifyLevel: notifyLevel, quietMode: quietMode, title: button.getAttribute('data-title'), channelId: channelId});
         });
     },
     componentWillUnmount: function() {
-        ChannelStore.removeChangeListener(this._onChange);
+        ChannelStore.removeChangeListener(this.onListenerChange);
     },
-    _onChange: function() {
-        if (!this.state.channel_id) return;
-        var notifyLevel = ChannelStore.getMember(this.state.channel_id).notify_level;
+    onListenerChange: function() {
+        if (!this.state.channelId) {
+            return;
+        }
+
+        var notifyLevel = ChannelStore.getMember(this.state.channelId).notify_level;
         var quietMode = false;
-        if (notifyLevel === "quiet") quietMode = true;
+        if (notifyLevel === 'quiet') {
+            quietMode = true;
+        }
 
         var newState = this.state;
-        newState.notify_level = notifyLevel;
-        newState.quiet_mode = quietMode;
+        newState.notifyLevel = notifyLevel;
+        newState.quietMode = quietMode;
 
         if (!utils.areStatesEqual(this.state, newState)) {
             this.setState(newState);
         }
     },
     updateSection: function(section) {
-        this.setState({ activeSection: section });
+        this.setState({activeSection: section});
     },
     getInitialState: function() {
-        return { notify_level: "", title: "", channel_id: "", activeSection: "" };
+        return {notifyLevel: '', title: '', channelId: '', activeSection: ''};
     },
     handleUpdate: function() {
-        var channel_id = this.state.channel_id;
-        var notify_level = this.state.quiet_mode ? "quiet" : this.state.notify_level;
+        var channelId = this.state.channelId;
+        var notifyLevel = this.state.notifyLevel;
+        if (this.state.quietMode) {
+            notifyLevel = 'quiet';
+        }
 
         var data = {};
-        data["channel_id"] = channel_id;
-        data["user_id"] = UserStore.getCurrentId();
-        data["notify_level"] = notify_level;
+        data.channel_id = channelId;
+        data.user_id = UserStore.getCurrentId();
+        data.notify_level = notifyLevel;
 
-        if (!data["notify_level"] || data["notify_level"].length === 0) return;
+        if (!data.notify_level || data.notify_level.length === 0) {
+            return;
+        }
 
         client.updateNotifyLevel(data,
-            function(data) {
-                var member = ChannelStore.getMember(channel_id);
-                member.notify_level = notify_level;
+            function success() {
+                var member = ChannelStore.getMember(channelId);
+                member.notify_level = notifyLevel;
                 ChannelStore.setChannelMember(member);
-                this.updateSection("");
+                this.updateSection('');
             }.bind(this),
-            function(err) {
-                this.setState({ server_error: err.message });
+            function error(err) {
+                this.setState({serverError: err.message});
             }.bind(this)
         );
     },
     handleRadioClick: function(notifyLevel) {
-        this.setState({ notify_level: notifyLevel, quiet_mode: false });
+        this.setState({notifyLevel: notifyLevel, quietMode: false});
         this.refs.modal.getDOMNode().focus();
     },
     handleQuietToggle: function(quietMode) {
-        this.setState({ notify_level: "none", quiet_mode: quietMode });
+        this.setState({notifyLevel: 'none', quietMode: quietMode});
         this.refs.modal.getDOMNode().focus();
     },
     render: function() {
-        var server_error = this.state.server_error ? <div className='form-group has-error'><label className='control-label'>{ this.state.server_error }</label></div> : null;
+        var serverError = null;
+        if (this.state.serverError) {
+            serverError = <div className='form-group has-error'><label className='control-label'>{this.state.serverError}</label></div>;
+        }
 
         var self = this;
+        var describe = '';
+        var inputs = [];
+
+        var handleAllClick;
+        var handleMentionClick;
+        var handleNoneClick;
+
+        var handleUpdateSection;
 
         var desktopSection;
         if (this.state.activeSection === 'desktop') {
             var notifyActive = [false, false, false];
-            if (this.state.notify_level === "mention") {
+            if (this.state.notifyLevel === 'mention') {
                 notifyActive[1] = true;
-            } else if (this.state.notify_level === "all") {
+            } else if (this.state.notifyLevel === 'all') {
                 notifyActive[0] = true;
             } else {
                 notifyActive[2] = true;
             }
 
-            var inputs = [];
+            handleAllClick = function allClick() {
+                self.handleRadioClick('all');
+            };
+            handleMentionClick = function mentionClick() {
+                self.handleRadioClick('mention');
+            };
+            handleNoneClick = function noneClick() {
+                self.handleRadioClick('none');
+            };
 
             inputs.push(
                 <div>
-                    <div className="radio">
+                    <div className='radio'>
                         <label>
-                            <input type="radio" checked={notifyActive[0]} onClick={function(){self.handleRadioClick("all")}}>For all activity</input>
+                            <input type='radio' checked={notifyActive[0]} onClick={handleAllClick}>For all activity</input>
                         </label>
                         <br/>
                     </div>
-                    <div className="radio">
+                    <div className='radio'>
                         <label>
-                            <input type="radio" checked={notifyActive[1]} onClick={function(){self.handleRadioClick("mention")}}>Only for mentions</input>
+                            <input type='radio' checked={notifyActive[1]} onClick={handleMentionClick}>Only for mentions</input>
                         </label>
                         <br/>
                     </div>
-                    <div className="radio">
+                    <div className='radio'>
                         <label>
-                            <input type="radio" checked={notifyActive[2]} onClick={function(){self.handleRadioClick("none")}}>Never</input>
+                            <input type='radio' checked={notifyActive[2]} onClick={handleNoneClick}>Never</input>
                         </label>
                     </div>
                 </div>
             );
 
+            handleUpdateSection = function updateSection(e) {
+                self.updateSection('');
+                self.onListenerChange();
+                e.preventDefault();
+            };
+
             desktopSection = (
                 <SettingItemMax
-                    title="Send desktop notifications"
+                    title='Send desktop notifications'
                     inputs={inputs}
                     submit={this.handleUpdate}
-                    server_error={server_error}
-                    updateSection={function(e){self.updateSection("");self._onChange();e.preventDefault();}}
+                    server_error={serverError}
+                    updateSection={handleUpdateSection}
                 />
             );
         } else {
-            var describe = "";
-            if (this.state.notify_level === "mention") {
-                describe = "Only for mentions";
-            } else if (this.state.notify_level === "all") {
-                describe = "For all activity";
+            if (this.state.notifyLevel === 'mention') {
+                describe = 'Only for mentions';
+            } else if (this.state.notifyLevel === 'all') {
+                describe = 'For all activity';
             } else {
-                describe = "Never";
+                describe = 'Never';
             }
+
+            handleUpdateSection = function updateSection(e) {
+                self.updateSection('desktop');
+                e.preventDefault();
+            };
 
             desktopSection = (
                 <SettingItemMin
-                    title="Send desktop notifications"
+                    title='Send desktop notifications'
                     describe={describe}
-                    updateSection={function(e){self.updateSection("desktop");e.preventDefault();}}
+                    updateSection={handleUpdateSection}
                 />
             );
         }
 
         var quietSection;
         if (this.state.activeSection === 'quiet') {
-            var quietActive = ["",""];
-            if (this.state.quiet_mode) {
-                quietActive[0] = "active";
+            var quietActive = ['', ''];
+            if (this.state.quietMode) {
+                quietActive[0] = 'active';
             } else {
-                quietActive[1] = "active";
+                quietActive[1] = 'active';
             }
-
-            var inputs = [];
 
             inputs.push(
                 <div>
-                    <div className="btn-group" data-toggle="buttons-radio">
-                        <button className={"btn btn-default "+quietActive[0]} onClick={function(){self.handleQuietToggle(true)}}>On</button>
-                        <button className={"btn btn-default "+quietActive[1]} onClick={function(){self.handleQuietToggle(false)}}>Off</button>
+                    <div className='btn-group' data-toggle='buttons-radio'>
+                        <button className={'btn btn-default ' + quietActive[0]} onClick={self.handleQuietToggle.bind(this, true)}>On</button>
+                        <button className={'btn btn-default ' + quietActive[1]} onClick={self.handleQuietToggle.bind(this, false)}>Off</button>
                     </div>
                 </div>
             );
@@ -173,58 +215,67 @@ module.exports = React.createClass({
                 </div>
             );
 
+            handleUpdateSection = function updateSection(e) {
+                self.updateSection('');
+                self.onListenerChange();
+                e.preventDefault();
+            };
+
             quietSection = (
                 <SettingItemMax
-                    title="Quiet mode"
+                    title='Quiet mode'
                     inputs={inputs}
                     submit={this.handleUpdate}
-                    server_error={server_error}
-                    updateSection={function(e){self.updateSection("");self._onChange();e.preventDefault();}}
+                    server_error={serverError}
+                    updateSection={handleUpdateSection}
                 />
             );
         } else {
-            var describe = "";
-            if (this.state.quiet_mode) {
-                describe = "On";
+            if (this.state.quietMode) {
+                describe = 'On';
             } else {
-                describe = "Off";
+                describe = 'Off';
             }
+
+            handleUpdateSection = function updateSection(e) {
+                self.updateSection('quiet');
+                e.preventDefault();
+            };
 
             quietSection = (
                 <SettingItemMin
-                    title="Quiet mode"
+                    title='Quiet mode'
                     describe={describe}
-                    updateSection={function(e){self.updateSection("quiet");e.preventDefault();}}
+                    updateSection={handleUpdateSection}
                 />
             );
         }
 
-        var self = this;
         return (
-            <div className="modal fade" id="channel_notifications" ref="modal" tabIndex="-1" role="dialog" aria-hidden="true">
-                <div className="modal-dialog settings-modal">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <button type="button" className="close" data-dismiss="modal">
-                                <span aria-hidden="true">&times;</span>
-                                <span className="sr-only">Close</span>
+            <div className='modal fade' id='channel_notifications' ref='modal' tabIndex='-1' role='dialog' aria-hidden='true'>
+                <div className='modal-dialog settings-modal'>
+                    <div className='modal-content'>
+                        <div className='modal-header'>
+                            <button type='button' className='close' data-dismiss='modal'>
+                                <span aria-hidden='true'>&times;</span>
+                                <span className='sr-only'>Close</span>
                             </button>
-                            <h4 className="modal-title">{"Notification Preferences for " + this.state.title}</h4>
+                            <h4 className='modal-title'>{'Notification Preferences for ' + this.state.title}</h4>
                         </div>
-                        <div className="modal-body">
-                            <div className="settings-table">
-                            <div className="settings-content">
-                                <div ref="wrapper" className="user-settings">
+                        <div className='modal-body'>
+                            <div className='settings-table'>
+                            <div className='settings-content'>
+                                <div ref='wrapper' className='user-settings'>
                                     <br/>
-                                    <div className="divider-dark first"/>
+                                    <div className='divider-dark first'/>
                                     {desktopSection}
-                                    <div className="divider-light"/>
+                                    <div className='divider-light'/>
                                     {quietSection}
-                                    <div className="divider-dark"/>
+                                    <div className='divider-dark'/>
                                 </div>
                             </div>
                             </div>
-                            { server_error }
+                            {serverError}
                         </div>
                     </div>
                 </div>
