@@ -253,11 +253,16 @@ module.exports = React.createClass({
     handlePaste: function() {
         this.doProcessMentions = true;
     },
+    handleDrop: function(e) {
+        var droppedFiles = e.dataTransfer.files;
+        console.log('HERE!');
+        this.props.messageText += droppedFiles[0];
+    },
     render: function() {
         return (
             <div ref='wrapper' className='textarea-wrapper'>
                 <CommandList ref='commands' addCommand={this.addCommand} channelId={this.props.channelId} />
-                <textarea id={this.props.id} ref='message' className={'form-control custom-textarea ' + this.state.connection} spellCheck='true' autoComplete='off' autoCorrect='off' rows='1' placeholder={this.props.createMessage} value={this.props.messageText} onInput={this.handleChange} onChange={this.handleChange} onKeyPress={this.handleKeyPress} onKeyDown={this.handleKeyDown} onFocus={this.handleFocus} onBlur={this.handleBlur} onPaste={this.handlePaste} />
+                <textarea id={this.props.id} ref='message' className={'form-control custom-textarea ' + this.state.connection} spellCheck='true' autoComplete='off' autoCorrect='off' rows='1' placeholder={this.props.createMessage} value={this.props.messageText} onInput={this.handleChange} onChange={this.handleChange} onKeyPress={this.handleKeyPress} onKeyDown={this.handleKeyDown} onFocus={this.handleFocus} onBlur={this.handleBlur} onPaste={this.handlePaste} onDrop={this.handleDrop} />
             </div>
         );
     }

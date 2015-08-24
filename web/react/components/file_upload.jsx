@@ -95,7 +95,7 @@ module.exports = React.createClass({
         var files = e.originalEvent.dataTransfer.files;
         var channelId = this.props.channelId || ChannelStore.getCurrentId();
 
-        if (typeof files !== 'string' && files.length) {
+        if (e.originalEvent.dataTransfer.types.indexOf('Files') !== -1 && typeof files !== 'string' && files.length) {
             var numFiles = files.length;
 
             var numToUpload = Math.min(Constants.MAX_UPLOAD_FILES - this.props.getFileCount(channelId), numFiles);
@@ -141,8 +141,10 @@ module.exports = React.createClass({
 
                 this.props.onUploadStart([clientId], channelId);
             }
-        } else {
+        } else if (e.originalEvent.dataTransfer.types.indexOf('Files') !== -1) {
             this.props.onUploadError('Invalid file upload', -1);
+        } else {
+            return true;
         }
     },
     componentDidMount: function() {
@@ -151,8 +153,10 @@ module.exports = React.createClass({
 
         if (this.props.postType === 'post') {
             $('.row.main').dragster({
-                enter: function() {
-                    $('.center-file-overlay').removeClass('hidden');
+                enter: function(dragsterEvent, e) {
+                    if (e.originalEvent.dataTransfer.types.indexOf('Files') !== -1) {
+                        $('.center-file-overlay').removeClass('hidden');
+                    }
                 },
                 leave: function() {
                     $('.center-file-overlay').addClass('hidden');
@@ -164,8 +168,10 @@ module.exports = React.createClass({
             });
         } else if (this.props.postType === 'comment') {
             $('.post-right__container').dragster({
-                enter: function() {
-                    $('.right-file-overlay').removeClass('hidden');
+                enter: function(dragsterEvent, e) {
+                    if (e.originalEvent.dataTransfer.types.indexOf('Files') !== -1) {
+                        $('.right-file-overlay').removeClass('hidden');
+                    }
                 },
                 leave: function() {
                     $('.right-file-overlay').addClass('hidden');
