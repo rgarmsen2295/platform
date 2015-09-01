@@ -71,7 +71,7 @@ export default class TeamSignupSendInvitesPage extends React.Component {
     }
     keySubmit(e) {
         if (e && e.keyCode === 13) {
-            this.submitNext(e)
+            this.submitNext(e);
         }
     }
     componentWillMount() {
@@ -190,6 +190,7 @@ export default class TeamSignupSendInvitesPage extends React.Component {
         );
     }
 }
+
 TeamSignupSendInvitesPage.propTypes = {
     state: React.PropTypes.object.isRequired,
     updateParent: React.PropTypes.func.isRequired
