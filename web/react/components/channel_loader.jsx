@@ -10,13 +10,18 @@ var SocketStore = require('../stores/socket_store.jsx');
 var ChannelStore = require('../stores/channel_store.jsx');
 var PostStore = require('../stores/post_store.jsx');
 var UserStore = require('../stores/user_store.jsx');
-var Constants = require('../utils/constants.jsx');
 
 var utils = require('../utils/utils.jsx');
 
-module.exports = React.createClass({
-    componentDidMount: function() {
+export default class ChannelLoader extends React.Component {
+    constructor(props) {
+        super(props);
 
+        this.onSocketChange = this.onSocketChange.bind(this);
+
+        this.state = {};
+    }
+    componentDidMount() {
         /* Initial aysnc loads */
         AsyncClient.getMe();
         AsyncClient.getPosts(ChannelStore.getCurrentId());
@@ -79,13 +84,13 @@ module.exports = React.createClass({
             utils.changeCss('.btn.btn-primary:hover, .btn.btn-primary:active, .btn.btn-primary:focus', 'background: ' + utils.changeColor(user.props.theme, +10) + ';');
             $('.team__header').addClass('theme--gray');
         }
-    },
-    onSocketChange: function(msg) {
+    }
+    onSocketChange(msg) {
         if (msg && msg.user_id && msg.user_id !== UserStore.getCurrentId()) {
             UserStore.setStatus(msg.user_id, 'online');
         }
-    },
-    render: function() {
+    }
+    render() {
         return <div/>;
     }
-});
+}
