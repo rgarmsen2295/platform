@@ -457,24 +457,23 @@ export default class UserSettingsGeneralTab extends React.Component {
                             />
                         </div>
                     </div>
-                    {helpText}
                 </div>
             );
 
             inputs.push(
-                <div
-                    key='emailPasswordConfirm'
-                    className='form-group'
-                >
-                    <label className='col-sm-5 control-label'>Current Password</label>
-                    <div className='col-sm-7'>
-                        <input
-                            className='form-control'
-                            type='password'
-                            onChange={this.updateCurrentPassword}
-                            value={this.state.currentPassword}
-                        />
+                <div key='emailPasswordConfirm'>
+                    <div className='form-group'>
+                        <label className='col-sm-5 control-label'>Current Password</label>
+                        <div className='col-sm-7'>
+                            <input
+                                className='form-control'
+                                type='password'
+                                onChange={this.updateCurrentPassword}
+                                value={this.state.currentPassword}
+                            />
+                        </div>
                     </div>
+                    {helpText}
                 </div>
             );
 
