@@ -469,7 +469,7 @@ export function textToJsx(textin, options) {
         for (let z = 0; z < words.length; z++) {
             var word = words[z];
             var trimWord = word.replace(puncStartRegex, '').replace(puncEndRegex, '').trim();
-            var mentionRegex = /^(?:@)([a-z0-9_]+)$/gi; // looks loop invariant but a weird JS bug needs it to be redefined here
+            var mentionRegex = /^(?:@)([a-z0-9_-]+)$/gi; // looks loop invariant but a weird JS bug needs it to be redefined here
             var explicitMention = mentionRegex.exec(trimWord);
 
             if (searchTerm !== '') {
