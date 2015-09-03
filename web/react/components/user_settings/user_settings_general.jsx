@@ -27,7 +27,6 @@ export default class UserSettingsGeneralTab extends React.Component {
         this.updateLastName = this.updateLastName.bind(this);
         this.updateNickname = this.updateNickname.bind(this);
         this.updateEmail = this.updateEmail.bind(this);
-        this.updateCurrentPassword = this.updateCurrentPassword.bind(this);
         this.updatePicture = this.updatePicture.bind(this);
         this.updateSection = this.updateSection.bind(this);
 
@@ -178,9 +177,6 @@ export default class UserSettingsGeneralTab extends React.Component {
     updateEmail(e) {
         this.setState({email: e.target.value});
     }
-    updateCurrentPassword(e) {
-        this.setState({currentPassword: e.target.value});
-    }
     updatePicture(e) {
         if (e.target.files && e.target.files[0]) {
             this.setState({picture: e.target.files[0]});
@@ -214,7 +210,7 @@ export default class UserSettingsGeneralTab extends React.Component {
         var user = props.user;
         var emailEnabled = global.window.config.SendEmailNotifications === 'true';
         return {username: user.username, firstName: user.first_name, lastName: user.last_name, nickname: user.nickname,
-                        email: user.email, picture: null, loadingPicture: false, emailEnabled: emailEnabled, currentPassword: ''};
+                        email: user.email, picture: null, loadingPicture: false, emailEnabled: emailEnabled};
     }
     render() {
         var user = this.props.user;
@@ -454,22 +450,6 @@ export default class UserSettingsGeneralTab extends React.Component {
                                 type='text'
                                 onChange={this.updateEmail}
                                 value={this.state.email}
-                            />
-                        </div>
-                    </div>
-                </div>
-            );
-
-            inputs.push(
-                <div key='emailPasswordConfirm'>
-                    <div className='form-group'>
-                        <label className='col-sm-5 control-label'>Current Password</label>
-                        <div className='col-sm-7'>
-                            <input
-                                className='form-control'
-                                type='password'
-                                onChange={this.updateCurrentPassword}
-                                value={this.state.currentPassword}
                             />
                         </div>
                     </div>
