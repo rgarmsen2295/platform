@@ -106,15 +106,27 @@ export default class UserSettingsGeneralTab extends React.Component {
             return;
         }
 
-        user.email = email;
+        if (!this.state.emailEnabled) {
+            user.email = email;
+            this.submitUser(user);
+        } else {
+            user.temp_email = email;
 
-        this.submitUser(user);
+            // Send email using new client call to verify email
+
+            // Put in send email success func
+            this.submitUser(user, {emailChangeInProgress: true});
+        }
     }
-    submitUser(user) {
+    submitUser(user, newState) {
         client.updateUser(user,
             function updateSuccess() {
                 this.updateSection('');
                 AsyncClient.getMe();
+
+                if (newState) {
+                    this.setState(newState);
+                }
             }.bind(this),
             function updateFailure(err) {
                 var state = this.setupInitialState(this.props);
@@ -438,6 +450,14 @@ export default class UserSettingsGeneralTab extends React.Component {
 
             if (!this.state.emailEnabled) {
                 helpText = <div className='setting-list__hint text-danger'>{'Email has been disabled by your system administrator. No notification emails will be sent until it is enabled.'}</div>;
+            } else if (this.state.emailChangeInProgress) {
+                let newEmail = UserStore.getCurrentUser().temp_email;
+                let oldEmail = UserStore.getCurrentUser().email;
+                if (newEmail) {
+                    helpText = 'A verification email was sent to ' + newEmail + '. Your old address (' + oldEmail + ') will continue to be used until the change is confirmed.';
+                } else {
+                    helpText = 'A verification email was sent to the email you provided. Your old address (' + oldEmail + ') will continue to be used until the change is confirmed.';
+                }
             }
 
             inputs.push(
@@ -471,10 +491,22 @@ export default class UserSettingsGeneralTab extends React.Component {
                 />
             );
         } else {
+            let describe = '';
+            if (this.state.emailChangeInProgress) {
+                let newEmail = UserStore.getCurrentUser().temp_email;
+                if (newEmail) {
+                    describe = 'New Address: ' + newEmail + '\nCheck your email to verify the above address.';
+                } else {
+                    describe = 'Check your email to verify your new address';
+                }
+            } else {
+                describe = UserStore.getCurrentUser().email;
+            }
+
             emailSection = (
                 <SettingItemMin
                     title='Email'
-                    describe={UserStore.getCurrentUser().email}
+                    describe={describe}
                     updateSection={function updateEmailSection() {
                         this.updateSection('email');
                     }.bind(this)}
