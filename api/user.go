@@ -108,6 +108,7 @@ func createUser(c *Context, w http.ResponseWriter, r *http.Request) {
 		}
 
 		user.Email = props["email"]
+		user.TempEmail = props["email"]
 		user.EmailVerified = true
 	}
 
@@ -847,7 +848,14 @@ func updateUser(c *Context, w http.ResponseWriter, r *http.Request) {
 
 		rusers := result.Data.([2]*model.User)
 
-		if rusers[0].Email != rusers[1].Email {
+		if rusers[0].TempEmail != rusers[1].TempEmail {
+			if tresult := <-Srv.Store.Team().Get(rusers[1].TeamId); tresult.Err != nil {
+				l4g.Error(tresult.Err.Message)
+			} else {
+				team := tresult.Data.(*model.Team)
+				fireAndForgetVerifyNewEmail(rusers[0].Id, rusers[0].TempEmail, team.Name, team.DisplayName, c.GetSiteURL(), c.GetTeamURLFromTeam(team))
+			}
+		} else if rusers[0].Email != rusers[1].Email {
 			if tresult := <-Srv.Store.Team().Get(rusers[1].TeamId); tresult.Err != nil {
 				l4g.Error(tresult.Err.Message)
 			} else {
@@ -860,6 +868,10 @@ func updateUser(c *Context, w http.ResponseWriter, r *http.Request) {
 		rusers[0].AuthData = ""
 		w.Write([]byte(rusers[0].ToJson()))
 	}
+}
+
+func updateEmail(c *Context, w http.ResponseWriter, r *http.Request) {
+
 }
 
 func updatePassword(c *Context, w http.ResponseWriter, r *http.Request) {
@@ -1302,6 +1314,23 @@ func fireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL stri
 			l4g.Error("Failed to send update password email successfully err=%v", err)
 		}
 
+	}()
+}
+
+func fireAndForgetVerifyNewEmail(userId, userEmail, teamName, teamDisplayName, siteURL, teamURL string) {
+	go func() {
+
+		link := fmt.Sprintf("%s/verify_email?uid=%s&hid=%s&teamname=%s&email=%s", siteURL, userId, model.HashPassword(userId), teamName, userEmail)
+
+		subjectPage := NewServerTemplatePage("verify_new_email_subject", siteURL)
+		subjectPage.Props["TeamDisplayName"] = teamDisplayName
+		bodyPage := NewServerTemplatePage("verify_new_email_body", siteURL)
+		bodyPage.Props["TeamDisplayName"] = teamDisplayName
+		bodyPage.Props["VerifyUrl"] = link
+
+		if err := utils.SendMail(userEmail, subjectPage.Render(), bodyPage.Render()); err != nil {
+			l4g.Error("Failed to send verification email successfully err=%v", err)
+		}
 	}()
 }
 

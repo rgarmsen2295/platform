@@ -221,8 +221,11 @@ export default class UserSettingsGeneralTab extends React.Component {
     setupInitialState(props) {
         var user = props.user;
         var emailEnabled = global.window.config.SendEmailNotifications === 'true';
+        var emailChangeInProgress = props.user.email !== props.user.temp_email;
+
         return {username: user.username, firstName: user.first_name, lastName: user.last_name, nickname: user.nickname,
-                        email: user.email, picture: null, loadingPicture: false, emailEnabled: emailEnabled};
+                        email: user.email, picture: null, loadingPicture: false, emailEnabled: emailEnabled,
+                        emailChangeInProgress: emailChangeInProgress};
     }
     render() {
         var user = this.props.user;
@@ -492,7 +495,7 @@ export default class UserSettingsGeneralTab extends React.Component {
             );
         } else {
             let describe = '';
-            if (this.state.emailChangeInProgress) {
+            if (this.state.emailEnabled && this.state.emailChangeInProgress) {
                 let newEmail = UserStore.getCurrentUser().temp_email;
                 if (newEmail) {
                     describe = 'New Address: ' + newEmail + '\nCheck your email to verify the above address.';

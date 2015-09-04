@@ -42,6 +42,7 @@ export default class SignupUserComplete extends React.Component {
         }
 
         this.state.user.email = providedEmail;
+        this.state.user.temp_email = this.state.user.email;
 
         this.state.user.username = React.findDOMNode(this.refs.name).value.trim().toLowerCase();
         if (!this.state.user.username) {

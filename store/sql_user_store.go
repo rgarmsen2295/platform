@@ -33,6 +33,7 @@ func NewSqlUserStore(sqlStore *SqlStore) UserStore {
 		table.ColMap("Props").SetMaxSize(4000)
 		table.ColMap("NotifyProps").SetMaxSize(2000)
 		table.ColMap("ThemeProps").SetMaxSize(2000)
+		table.ColMap("TempEmail").SetMaxSize(128)
 		table.SetUniqueTogether("Email", "TeamId")
 		table.SetUniqueTogether("Username", "TeamId")
 	}
@@ -42,6 +43,7 @@ func NewSqlUserStore(sqlStore *SqlStore) UserStore {
 
 func (us SqlUserStore) UpgradeSchemaIfNeeded() {
 	us.CreateColumnIfNotExists("Users", "ThemeProps", "varchar(2000)", "character varying(2000)", "{}")
+	us.CreateColumnIfNotExists("Users", "TempEmail", "varchar(128)", "varchar(128)", "") // for verifying new emails
 }
 
 func (us SqlUserStore) CreateIndexesIfNotExists() {
@@ -138,7 +140,7 @@ func (us SqlUserStore) Update(user *model.User, allowActiveUpdate bool) StoreCha
 				user.DeleteAt = oldUser.DeleteAt
 			}
 
-			if user.Email != oldUser.Email {
+			if user.TempEmail != user.Email {
 				user.EmailVerified = false
 			}
 
