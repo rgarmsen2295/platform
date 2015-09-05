@@ -58,6 +58,7 @@ func InitWeb() {
 	mainrouter.Handle("/signup_user_complete/", api.AppHandlerIndependent(signupUserComplete)).Methods("GET")
 	mainrouter.Handle("/signup_team_confirm/", api.AppHandlerIndependent(signupTeamConfirm)).Methods("GET")
 	mainrouter.Handle("/verify_email", api.AppHandlerIndependent(verifyEmail)).Methods("GET")
+	mainrouter.Handle("/verify_new_email", api.AppHandlerIndependent(verifyNewEmail)).Methods("GET")
 	mainrouter.Handle("/find_team", api.AppHandlerIndependent(findTeam)).Methods("GET")
 	mainrouter.Handle("/signup_team", api.AppHandlerIndependent(signup)).Methods("GET")
 	mainrouter.Handle("/login/{service:[A-Za-z]+}/complete", api.AppHandlerIndependent(loginCompleteOAuth)).Methods("GET")
@@ -404,6 +405,34 @@ func verifyEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 	page.Props["UserEmail"] = email
 	page.Props["ResendSuccess"] = resendSuccess
 	page.Render(c, w)
+}
+
+func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
+	hashedId := r.URL.Query().Get("hid")
+	userId := r.URL.Query().Get("uid")
+
+	var isVerified string
+	if len(userId) != 26 {
+		isVerified = "false"
+	} else if len(hashedId) == 0 {
+		isVerified = "false"
+	} else if model.ComparePassword(hashedId, userId) {
+		isVerified = "true"
+		if c.Err = (<-api.Srv.Store.User().UpdateEmail(userId)).Err; c.Err != nil {
+			return
+		} else {
+			c.LogAudit("")
+		}
+	} else {
+		isVerified = "false"
+	}
+
+	if (isVerified == "true") {
+		page := NewHtmlTemplatePage("new_email_verify", "New Email Verified")
+		page.Render(c, w)
+	} else {
+		return
+	}
 }
 
 func findTeam(c *api.Context, w http.ResponseWriter, r *http.Request) {

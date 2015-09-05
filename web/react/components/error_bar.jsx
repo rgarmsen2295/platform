@@ -8,7 +8,6 @@ export default class ErrorBar extends React.Component {
         super();
 
         this.onErrorChange = this.onErrorChange.bind(this);
-        this.onUserChange = this.onUserChange.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.prevTimer = null;
 

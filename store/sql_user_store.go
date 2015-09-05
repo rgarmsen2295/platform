@@ -36,6 +36,7 @@ func NewSqlUserStore(sqlStore *SqlStore) UserStore {
 		table.ColMap("TempEmail").SetMaxSize(128)
 		table.SetUniqueTogether("Email", "TeamId")
 		table.SetUniqueTogether("Username", "TeamId")
+		table.SetUniqueTogether("TempEmail", "TeamId")
 	}
 
 	return us
@@ -138,10 +139,6 @@ func (us SqlUserStore) Update(user *model.User, allowActiveUpdate bool) StoreCha
 			if !allowActiveUpdate {
 				user.Roles = oldUser.Roles
 				user.DeleteAt = oldUser.DeleteAt
-			}
-
-			if user.TempEmail != user.Email {
-				user.EmailVerified = false
 			}
 
 			if user.Username != oldUser.Username {
@@ -271,6 +268,26 @@ func (us SqlUserStore) UpdatePassword(userId, hashedPassword string) StoreChanne
 		} else {
 			result.Data = userId
 		}
+
+		storeChannel <- result
+		close(storeChannel)
+	}()
+
+	return storeChannel
+}
+
+func (us SqlUserStore) UpdateEmail(userId string) StoreChannel {
+	storeChannel := make(StoreChannel)
+
+	go func() {
+		result := StoreResult{}
+
+		//PROBABLY INCORRECT QUERY UPDATE
+		if _, err := us.GetMaster().Exec("UPDATE Users SET Email = TempEmail WHERE Id = :UserId", map[string]interface{}{"UserId": userId}); err != nil {
+			result.Err = model.NewAppError("SqlUserStore.UpdateEmail", "Unable to update email field", "userId="+userId+", "+err.Error())
+		}
+
+		result.Data = userId
 
 		storeChannel <- result
 		close(storeChannel)

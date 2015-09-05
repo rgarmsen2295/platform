@@ -187,6 +187,10 @@ func CreateUser(c *Context, team *model.Team, user *model.User) *model.User {
 
 	user.MakeNonNil()
 
+	if len(user.TempEmail) == 0 {
+		user.TempEmail = user.Email
+	}
+
 	if result := <-Srv.Store.User().Save(user); result.Err != nil {
 		c.Err = result.Err
 		l4g.Error("Couldn't save the user err=%v", result.Err)
@@ -870,10 +874,6 @@ func updateUser(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func updateEmail(c *Context, w http.ResponseWriter, r *http.Request) {
-
-}
-
 func updatePassword(c *Context, w http.ResponseWriter, r *http.Request) {
 	c.LogAudit("attempted")
 
@@ -1320,11 +1320,13 @@ func fireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL stri
 func fireAndForgetVerifyNewEmail(userId, userEmail, teamName, teamDisplayName, siteURL, teamURL string) {
 	go func() {
 
-		link := fmt.Sprintf("%s/verify_email?uid=%s&hid=%s&teamname=%s&email=%s", siteURL, userId, model.HashPassword(userId), teamName, userEmail)
+		link := fmt.Sprintf("%s/verify_new_email?uid=%s&hid=%s", siteURL, userId, model.HashPassword(userId))
 
-		subjectPage := NewServerTemplatePage("verify_new_email_subject", siteURL)
+		subjectPage := NewServerTemplatePage("verify_new_email_subject")
+		subjectPage.Props["SiteURL"] = siteURL
 		subjectPage.Props["TeamDisplayName"] = teamDisplayName
-		bodyPage := NewServerTemplatePage("verify_new_email_body", siteURL)
+		bodyPage := NewServerTemplatePage("verify_new_email_body")
+		bodyPage.Props["SiteURL"] = siteURL
 		bodyPage.Props["TeamDisplayName"] = teamDisplayName
 		bodyPage.Props["VerifyUrl"] = link
 

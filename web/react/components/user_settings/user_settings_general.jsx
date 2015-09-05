@@ -224,7 +224,7 @@ export default class UserSettingsGeneralTab extends React.Component {
         var emailChangeInProgress = props.user.email !== props.user.temp_email;
 
         return {username: user.username, firstName: user.first_name, lastName: user.last_name, nickname: user.nickname,
-                        email: user.email, picture: null, loadingPicture: false, emailEnabled: emailEnabled,
+                        email: user.temp_email, picture: null, loadingPicture: false, emailEnabled: emailEnabled,
                         emailChangeInProgress: emailChangeInProgress};
     }
     render() {
