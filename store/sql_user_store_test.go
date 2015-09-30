@@ -336,3 +336,26 @@ func TestUserStoreUpdatePassword(t *testing.T) {
 		}
 	}
 }
+
+func TestUserStoreUpdateEmail(t *testing.T) {
+	Setup()
+
+	u1 := model.User{}
+	u1.TeamId = model.NewId()
+	u1.Email = model.NewId()
+	u1.TempEmail = model.NewId()
+	Must(store.User().Save(&u1))
+
+	if err := (<-store.User().UpdateEmail(u1.Id)).Err; err != nil {
+		t.Fatal(err)
+	}
+
+	if r1 := <-store.User().GetByEmail(u1.TeamId, u1.TempEmail); r1.Err != nil {
+		t.Fatal(r1.Err)
+	} else {
+		user := r1.Data.(*model.User)
+		if user.Email != user.TempEmail {
+			t.Fatal("Email was not updated correctly")
+		}
+	}
+}

@@ -86,7 +86,7 @@ func (us SqlUserStore) Save(user *model.User) StoreChannel {
 		}
 
 		if err := us.GetMaster().Insert(user); err != nil {
-			if IsUniqueConstraintError(err.Error(), "Email", "users_email_teamid_key") {
+			if IsUniqueConstraintError(err.Error(), "Email", "users_email_teamid_key") || IsUniqueConstraintError(err.Error(), "TempEmail", "users_temp_email_teamid_key") {
 				result.Err = model.NewAppError("SqlUserStore.Save", "An account with that email already exists.", "user_id="+user.Id+", "+err.Error())
 			} else if IsUniqueConstraintError(err.Error(), "Username", "users_username_teamid_key") {
 				result.Err = model.NewAppError("SqlUserStore.Save", "An account with that username already exists.", "user_id="+user.Id+", "+err.Error())
