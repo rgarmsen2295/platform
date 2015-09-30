@@ -36,7 +36,7 @@ type User struct {
 	AuthData           string    `json:"auth_data"`
 	AuthService        string    `json:"auth_service"`
 	Email              string    `json:"email"`
-	TempEmail		   string    `json:"temp_email"`
+	TempEmail          string    `json:"temp_email"`
 	EmailVerified      bool      `json:"email_verified"`
 	Nickname           string    `json:"nickname"`
 	FirstName          string    `json:"first_name"`

@@ -852,19 +852,19 @@ func updateUser(c *Context, w http.ResponseWriter, r *http.Request) {
 
 		rusers := result.Data.([2]*model.User)
 
-		if rusers[0].TempEmail != rusers[1].TempEmail {
+		if rusers[0].TempEmail != rusers[1].TempEmail && rusers[0].Email == rusers[1].Email {
 			if tresult := <-Srv.Store.Team().Get(rusers[1].TeamId); tresult.Err != nil {
 				l4g.Error(tresult.Err.Message)
 			} else {
 				team := tresult.Data.(*model.Team)
-				fireAndForgetVerifyNewEmail(rusers[0].Id, rusers[0].TempEmail, team.Name, team.DisplayName, c.GetSiteURL(), c.GetTeamURLFromTeam(team))
+				fireAndForgetVerifyNewEmail(rusers[0].Id, rusers[0].TempEmail, rusers[0].Email, team.Name, team.DisplayName, c.GetSiteURL(), c.GetTeamURLFromTeam(team))
 			}
 		} else if rusers[0].Email != rusers[1].Email {
 			if tresult := <-Srv.Store.Team().Get(rusers[1].TeamId); tresult.Err != nil {
 				l4g.Error(tresult.Err.Message)
 			} else {
 				team := tresult.Data.(*model.Team)
-				fireAndForgetEmailChangeEmail(rusers[1].Email, team.DisplayName, c.GetTeamURLFromTeam(team), c.GetSiteURL())
+				FireAndForgetEmailChangeEmail(rusers[1].Email, team.DisplayName, c.GetTeamURLFromTeam(team), c.GetSiteURL())
 			}
 		}
 
@@ -1299,7 +1299,7 @@ func fireAndForgetPasswordChangeEmail(email, teamDisplayName, teamURL, siteURL, 
 	}()
 }
 
-func fireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL string) {
+func FireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL string) {
 	go func() {
 
 		subjectPage := NewServerTemplatePage("email_change_subject")
@@ -1317,10 +1317,10 @@ func fireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL stri
 	}()
 }
 
-func fireAndForgetVerifyNewEmail(userId, userEmail, teamName, teamDisplayName, siteURL, teamURL string) {
+func fireAndForgetVerifyNewEmail(userId, newUserEmail, oldUserEmail, teamName, teamDisplayName, siteURL, teamURL string) {
 	go func() {
 
-		link := fmt.Sprintf("%s/verify_new_email?uid=%s&hid=%s", siteURL, userId, model.HashPassword(userId))
+		link := fmt.Sprintf("%s/verify_new_email?uid=%s&hid=%s&old_email=%s&teamname=%s", siteURL, userId, model.HashPassword(userId), oldUserEmail, teamName)
 
 		subjectPage := NewServerTemplatePage("verify_new_email_subject")
 		subjectPage.Props["SiteURL"] = siteURL
@@ -1330,7 +1330,7 @@ func fireAndForgetVerifyNewEmail(userId, userEmail, teamName, teamDisplayName, s
 		bodyPage.Props["TeamDisplayName"] = teamDisplayName
 		bodyPage.Props["VerifyUrl"] = link
 
-		if err := utils.SendMail(userEmail, subjectPage.Render(), bodyPage.Render()); err != nil {
+		if err := utils.SendMail(newUserEmail, subjectPage.Render(), bodyPage.Render()); err != nil {
 			l4g.Error("Failed to send verification email successfully err=%v", err)
 		}
 	}()

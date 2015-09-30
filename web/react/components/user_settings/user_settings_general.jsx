@@ -2,6 +2,7 @@
 // See License.txt for license information.
 
 var UserStore = require('../../stores/user_store.jsx');
+var ErrorStore = require('../../stores/error_store.jsx');
 var SettingItemMin = require('../setting_item_min.jsx');
 var SettingItemMax = require('../setting_item_max.jsx');
 var SettingPicture = require('../setting_picture.jsx');
@@ -106,15 +107,11 @@ export default class UserSettingsGeneralTab extends React.Component {
             return;
         }
 
-        if (!this.state.emailEnabled) {
+        if (!this.state.emailEnabled && !this.state.emailVerificationEnabled) {
             user.email = email;
             this.submitUser(user);
         } else {
             user.temp_email = email;
-
-            // Send email using new client call to verify email
-
-            // Put in send email success func
             this.submitUser(user, {emailChangeInProgress: true});
         }
     }
@@ -125,6 +122,11 @@ export default class UserSettingsGeneralTab extends React.Component {
                 AsyncClient.getMe();
 
                 if (newState) {
+                    if (newState.emailChangeInProgress) {
+                        ErrorStore.storeLastError({message: 'Check your email at ' + user.temp_email + ' to verify the address.'});
+                        ErrorStore.emitChange();
+                    }
+
                     this.setState(newState);
                 }
             }.bind(this),
@@ -221,11 +223,12 @@ export default class UserSettingsGeneralTab extends React.Component {
     setupInitialState(props) {
         var user = props.user;
         var emailEnabled = global.window.config.SendEmailNotifications === 'true';
+        var emailVerificationEnabled = global.window.config.RequireEmailVerification === 'true';
         var emailChangeInProgress = props.user.email !== props.user.temp_email;
 
         return {username: user.username, firstName: user.first_name, lastName: user.last_name, nickname: user.nickname,
                         email: user.temp_email, picture: null, loadingPicture: false, emailEnabled: emailEnabled,
-                        emailChangeInProgress: emailChangeInProgress};
+                        emailVerificationEnabled: emailVerificationEnabled, emailChangeInProgress: emailChangeInProgress};
     }
     render() {
         var user = this.props.user;
@@ -495,8 +498,8 @@ export default class UserSettingsGeneralTab extends React.Component {
             );
         } else {
             let describe = '';
-            if (this.state.emailEnabled && this.state.emailChangeInProgress) {
-                let newEmail = UserStore.getCurrentUser().temp_email;
+            if (this.state.emailEnabled && this.state.emailVerificationEnabled && this.state.emailChangeInProgress) {
+                const newEmail = UserStore.getCurrentUser().temp_email;
                 if (newEmail) {
                     describe = 'New Address: ' + newEmail + '\nCheck your email to verify the above address.';
                 } else {

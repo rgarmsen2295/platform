@@ -410,6 +410,8 @@ func verifyEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 	hashedId := r.URL.Query().Get("hid")
 	userId := r.URL.Query().Get("uid")
+	oldEmail := r.URL.Query().Get("old_email")
+	teamName := r.URL.Query().Get("teamname")
 
 	var isVerified string
 	if len(userId) != 26 {
@@ -427,7 +429,15 @@ func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 		isVerified = "false"
 	}
 
-	if (isVerified == "true") {
+	if isVerified == "true" {
+		var team *model.Team
+		if result := <-api.Srv.Store.Team().GetByName(teamName); result.Err != nil {
+			c.Err = result.Err
+		} else {
+			team = result.Data.(*model.Team)
+			api.FireAndForgetEmailChangeEmail(oldEmail, team.DisplayName, c.GetTeamURLFromTeam(team), c.GetSiteURL())
+		}
+
 		page := NewHtmlTemplatePage("new_email_verify", "New Email Verified")
 		page.Render(c, w)
 	} else {

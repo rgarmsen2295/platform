@@ -37,6 +37,8 @@ var FileUploadOverlay = require('../components/file_upload_overlay.jsx');
 var RegisterAppModal = require('../components/register_app_modal.jsx');
 var ImportThemeModal = require('../components/user_settings/import_theme_modal.jsx');
 
+var UserStore = require('../stores/user_store.jsx');
+
 var Constants = require('../utils/constants.jsx');
 var ActionTypes = Constants.ActionTypes;
 
@@ -236,8 +238,13 @@ function setupChannelPage(props) {
         document.getElementById('register_app_modal')
     );
 
+    const currentUser = UserStore.getCurrentUser();
+
     if (global.window.config.SendEmailNotifications === 'false') {
         ErrorStore.storeLastError({message: 'Preview Mode: Email notifications have not been configured'});
+        ErrorStore.emitChange();
+    } else if (currentUser.temp_email !== currentUser.email) {
+        ErrorStore.storeLastError({message: 'Check your email at ' + currentUser.temp_email + ' to verify the address.'});
         ErrorStore.emitChange();
     }
 }

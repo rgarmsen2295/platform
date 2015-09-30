@@ -44,7 +44,7 @@ func NewSqlUserStore(sqlStore *SqlStore) UserStore {
 
 func (us SqlUserStore) UpgradeSchemaIfNeeded() {
 	us.CreateColumnIfNotExists("Users", "ThemeProps", "varchar(2000)", "character varying(2000)", "{}")
-	us.CreateColumnIfNotExists("Users", "TempEmail", "varchar(128)", "varchar(128)", "") // for verifying new emails
+	us.CreateColumnIfNotExists("Users", "TempEmail", "varchar(128)", "varchar(128)", "")
 }
 
 func (us SqlUserStore) CreateIndexesIfNotExists() {
@@ -282,7 +282,6 @@ func (us SqlUserStore) UpdateEmail(userId string) StoreChannel {
 	go func() {
 		result := StoreResult{}
 
-		//PROBABLY INCORRECT QUERY UPDATE
 		if _, err := us.GetMaster().Exec("UPDATE Users SET Email = TempEmail WHERE Id = :UserId", map[string]interface{}{"UserId": userId}); err != nil {
 			result.Err = model.NewAppError("SqlUserStore.UpdateEmail", "Unable to update email field", "userId="+userId+", "+err.Error())
 		}
