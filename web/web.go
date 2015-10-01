@@ -438,6 +438,7 @@ func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 			api.FireAndForgetEmailChangeEmail(oldEmail, team.DisplayName, c.GetTeamURLFromTeam(team), c.GetSiteURL())
 		}
 
+		api.RevokeAllSession(c, userId)
 		page := NewHtmlTemplatePage("new_email_verify", "New Email Verified")
 		page.Render(c, w)
 	} else {

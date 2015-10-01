@@ -852,7 +852,7 @@ func updateUser(c *Context, w http.ResponseWriter, r *http.Request) {
 
 		rusers := result.Data.([2]*model.User)
 
-		if rusers[0].TempEmail != rusers[1].TempEmail && rusers[0].Email == rusers[1].Email {
+		if rusers[0].TempEmail != rusers[1].TempEmail && rusers[0].Email == rusers[1].Email && rusers[0].Email != rusers[0].TempEmail {
 			if tresult := <-Srv.Store.Team().Get(rusers[1].TeamId); tresult.Err != nil {
 				l4g.Error(tresult.Err.Message)
 			} else {

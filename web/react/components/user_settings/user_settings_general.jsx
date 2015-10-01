@@ -98,7 +98,7 @@ export default class UserSettingsGeneralTab extends React.Component {
         var user = UserStore.getCurrentUser();
         var email = this.state.email.trim().toLowerCase();
 
-        if (user.email === email) {
+        if (user.temp_email === email) {
             return;
         }
 
@@ -112,7 +112,11 @@ export default class UserSettingsGeneralTab extends React.Component {
             this.submitUser(user);
         } else {
             user.temp_email = email;
-            this.submitUser(user, {emailChangeInProgress: true});
+            if (email !== user.email) {
+                this.submitUser(user, {emailChangeInProgress: true});
+            } else {
+                this.submitUser(user, {emailChangeInProgress: false});
+            }
         }
     }
     submitUser(user, newState) {
@@ -452,13 +456,15 @@ export default class UserSettingsGeneralTab extends React.Component {
         }
         var emailSection;
         if (this.props.activeSection === 'email') {
-            let helpText = <div>Email is used for notifications, and requires verification if changed.</div>;
+            let helpText = <div>{'Email is used for notifications, and requires verification if changed.'}</div>;
 
             if (!this.state.emailEnabled) {
                 helpText = <div className='setting-list__hint text-danger'>{'Email has been disabled by your system administrator. No notification emails will be sent until it is enabled.'}</div>;
+            } else if (!this.state.emailVerificationEnabled) {
+                helpText = <div>{'Email is used for notifications.'}</div>;
             } else if (this.state.emailChangeInProgress) {
-                let newEmail = UserStore.getCurrentUser().temp_email;
-                let oldEmail = UserStore.getCurrentUser().email;
+                const newEmail = UserStore.getCurrentUser().temp_email;
+                const oldEmail = UserStore.getCurrentUser().email;
                 if (newEmail) {
                     helpText = 'A verification email was sent to ' + newEmail + '. Your old address (' + oldEmail + ') will continue to be used until the change is confirmed.';
                 } else {
@@ -498,7 +504,7 @@ export default class UserSettingsGeneralTab extends React.Component {
             );
         } else {
             let describe = '';
-            if (this.state.emailEnabled && this.state.emailVerificationEnabled && this.state.emailChangeInProgress) {
+            if (this.state.emailChangeInProgress) {
                 const newEmail = UserStore.getCurrentUser().temp_email;
                 if (newEmail) {
                     describe = 'New Address: ' + newEmail + '\nCheck your email to verify the above address.';

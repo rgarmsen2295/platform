@@ -153,7 +153,7 @@ func (us SqlUserStore) Update(user *model.User, allowActiveUpdate bool) StoreCha
 			}
 
 			if count, err := us.GetMaster().Update(user); err != nil {
-				if IsUniqueConstraintError(err.Error(), "Email", "users_email_teamid_key") {
+				if IsUniqueConstraintError(err.Error(), "Email", "users_email_teamid_key") || IsUniqueConstraintError(err.Error(), "TempEmail", "users_tempemail_teamid_key") {
 					result.Err = model.NewAppError("SqlUserStore.Update", "This email is already taken. Please choose another", "user_id="+user.Id+", "+err.Error())
 				} else if IsUniqueConstraintError(err.Error(), "Username", "users_username_teamid_key") {
 					result.Err = model.NewAppError("SqlUserStore.Update", "This username is already taken. Please choose another.", "user_id="+user.Id+", "+err.Error())
