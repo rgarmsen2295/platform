@@ -411,22 +411,40 @@ func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 	hashedId := r.URL.Query().Get("hid")
 	userId := r.URL.Query().Get("uid")
 	oldEmail := r.URL.Query().Get("old_email")
+	newEmail := r.URL.Query().Get("new_email")
 	teamName := r.URL.Query().Get("teamname")
 
-	var isVerified string
-	if len(userId) != 26 {
-		isVerified = "false"
-	} else if len(hashedId) == 0 {
-		isVerified = "false"
-	} else if model.ComparePassword(hashedId, userId) {
-		isVerified = "true"
-		if c.Err = (<-api.Srv.Store.User().UpdateEmail(userId)).Err; c.Err != nil {
-			return
-		} else {
-			c.LogAudit("")
-		}
+	var team *model.Team
+	if result := <-api.Srv.Store.Team().GetByName(teamName); result.Err != nil {
+		c.Err = result.Err
+		return
 	} else {
-		isVerified = "false"
+		team = result.Data.(*model.Team)
+	}
+
+	var isVerified string
+	if result := <-api.Srv.Store.User().GetByEmail(team.Id, oldEmail); result.Err != nil {
+		c.Err = result.Err
+		return
+	} else {
+		user := result.Data.(*model.User)
+
+		if user.Email == user.TempEmail || user.TempEmail != newEmail {
+			isVerified = "false"
+		} else if len(userId) != 26 {
+			isVerified = "false"
+		} else if len(hashedId) == 0 {
+			isVerified = "false"
+		} else if model.ComparePassword(hashedId, userId) {
+			isVerified = "true"
+			if c.Err = (<-api.Srv.Store.User().UpdateEmail(userId)).Err; c.Err != nil {
+				return
+			} else {
+				c.LogAudit("")
+			}
+		} else {
+			isVerified = "false"
+		}
 	}
 
 	if isVerified == "true" {
@@ -437,13 +455,11 @@ func verifyNewEmail(c *api.Context, w http.ResponseWriter, r *http.Request) {
 			team = result.Data.(*model.Team)
 			api.FireAndForgetEmailChangeEmail(oldEmail, team.DisplayName, c.GetTeamURLFromTeam(team), c.GetSiteURL())
 		}
-
-		api.RevokeAllSession(c, userId)
-		page := NewHtmlTemplatePage("new_email_verify", "New Email Verified")
-		page.Render(c, w)
-	} else {
-		return
 	}
+
+	page := NewHtmlTemplatePage("new_email_verify", "New Email Verified")
+	page.Props["IsVerified"] = isVerified
+	page.Render(c, w)
 }
 
 func findTeam(c *api.Context, w http.ResponseWriter, r *http.Request) {

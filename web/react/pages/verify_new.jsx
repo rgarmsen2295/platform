@@ -3,9 +3,11 @@
 
 var NewEmailVerify = require('../components/new_email_verify.jsx');
 
-global.window.setupNewEmailVerifyPage = function setupNewEmailVerifyPage() {
+function setupNewEmailVerifyPage(props) {
     React.render(
-        <NewEmailVerify />,
+        <NewEmailVerify isVerified={props.IsVerified}/>,
         document.getElementById('new_email_verify')
     );
-};
+}
+
+global.window.setupNewEmailVerifyPage = setupNewEmailVerifyPage;

@@ -1320,7 +1320,7 @@ func FireAndForgetEmailChangeEmail(email, teamDisplayName, teamURL, siteURL stri
 func fireAndForgetVerifyNewEmail(userId, newUserEmail, oldUserEmail, teamName, teamDisplayName, siteURL, teamURL string) {
 	go func() {
 
-		link := fmt.Sprintf("%s/verify_new_email?uid=%s&hid=%s&old_email=%s&teamname=%s", siteURL, userId, model.HashPassword(userId), oldUserEmail, teamName)
+		link := fmt.Sprintf("%s/verify_new_email?uid=%s&hid=%s&old_email=%s&new_email=%s&teamname=%s", siteURL, userId, model.HashPassword(userId), oldUserEmail, newUserEmail, teamName)
 
 		subjectPage := NewServerTemplatePage("verify_new_email_subject")
 		subjectPage.Props["SiteURL"] = siteURL
