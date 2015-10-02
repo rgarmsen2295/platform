@@ -4,6 +4,7 @@
 package store
 
 import (
+	l4g "code.google.com/p/log4go"
 	"fmt"
 	"github.com/mattermost/platform/model"
 	"github.com/mattermost/platform/utils"
@@ -44,7 +45,20 @@ func NewSqlUserStore(sqlStore *SqlStore) UserStore {
 
 func (us SqlUserStore) UpgradeSchemaIfNeeded() {
 	us.CreateColumnIfNotExists("Users", "ThemeProps", "varchar(2000)", "character varying(2000)", "{}")
+
+	fillTempEmail := false
+
+	if !us.DoesColumnExist("Users", "TempEmail") {
+		fillTempEmail = true
+	}
+
 	us.CreateColumnIfNotExists("Users", "TempEmail", "varchar(128)", "varchar(128)", "")
+
+	if fillTempEmail {
+		if _, err := us.GetMaster().Exec("UPDATE Users SET TempEmail = Email"); err != nil {
+			l4g.Error("%v", model.NewAppError("SqlUserStore.UpgradeSchemaIfNeeded", "Unable to populate TempEmail field", err.Error()))
+		}
+	}
 }
 
 func (us SqlUserStore) CreateIndexesIfNotExists() {
