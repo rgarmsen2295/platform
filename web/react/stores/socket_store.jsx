@@ -239,7 +239,7 @@ function handlePostDeleteEvent(msg) {
     const post = JSON.parse(msg.props.post);
 
     PostStore.storeUnseenDeletedPost(post);
-    PostStore.removePost(post, true);
+    PostStore.removePost(post.id, post.channel_id);
     PostStore.emitChange();
 }
 
