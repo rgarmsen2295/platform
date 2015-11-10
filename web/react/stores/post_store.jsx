@@ -7,6 +7,7 @@ var EventEmitter = require('events').EventEmitter;
 var ChannelStore = require('../stores/channel_store.jsx');
 var BrowserStore = require('../stores/browser_store.jsx');
 var UserStore = require('../stores/user_store.jsx');
+var SearchStore = require('../stores/search_store.jsx');
 
 var Constants = require('../utils/constants.jsx');
 var ActionTypes = Constants.ActionTypes;
@@ -422,23 +423,22 @@ class PostStoreClass extends EventEmitter {
 
         return commentCount;
     }
-    closeRHS() {
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH,
-            results: null
-        });
+    receiveSelectedPost(postList, fromSearch) {
+        this.storeSelectedPost(postList);
+        this.emitSelectedPostChange(fromSearch);
+    }
+    closeRHS(ignoreSearch, ignoreSearchTerm, ignoreSelectedPost) {
+        if (!ignoreSearch) {
+            SearchStore.receivedSearch(null, false);
+        }
 
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH_TERM,
-            term: null,
-            do_search: false,
-            is_mention_search: false
-        });
+        if (!ignoreSearchTerm) {
+            SearchStore.receivedSearchTerm(null, false, false);
+        }
 
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_POST_SELECTED,
-            results: null
-        });
+        if (!ignoreSelectedPost) {
+            this.receiveSelectedPost(null, false);
+        }
     }
 }
 
@@ -456,8 +456,7 @@ PostStore.dispatchToken = AppDispatcher.register((payload) => {
         PostStore.emitChange();
         break;
     case ActionTypes.RECIEVED_POST_SELECTED:
-        PostStore.storeSelectedPost(action.post_list);
-        PostStore.emitSelectedPostChange(action.from_search);
+        PostStore.receiveSelectedPost(action.post_list, action.from_search);
         break;
     case ActionTypes.RECIEVED_EDIT_POST:
         PostStore.emitEditPost(action);

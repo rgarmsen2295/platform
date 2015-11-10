@@ -75,16 +75,7 @@ export default class Navbar extends React.Component {
     hideSidebars(e) {
         var windowWidth = $(window).outerWidth();
         if (windowWidth <= 768) {
-            /*AppDispatcher.handleServerAction({
-                type: ActionTypes.RECIEVED_SEARCH,
-                results: null
-            });
-
-            AppDispatcher.handleServerAction({
-                type: ActionTypes.RECIEVED_POST_SELECTED,
-                results: null
-            });*/
-            PostStore.closeRHS();
+            PostStore.closeRHS(false, true);
 
             if (e.target.className !== 'navbar-toggle' && e.target.className !== 'icon-bar') {
                 $('.inner__wrap').removeClass('move--right move--left move--left-small');

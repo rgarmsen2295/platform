@@ -54,6 +54,9 @@ export default class RhsThread extends React.Component {
 
         return {postList: postList};
     }
+    componentWillMount() {
+        // check
+    }
     componentDidMount() {
         PostStore.addSelectedPostChangeListener(this.onChange);
         PostStore.addChangeListener(this.onChangeAll);
@@ -73,9 +76,9 @@ export default class RhsThread extends React.Component {
         const oldRootPost = this.getRootPost(prevState.postList);
         const newRootPost = this.getRootPost(this.state.postList);
 
-        if (!newRootPost && (!oldRootPost || oldRootPost.user_id !== UserStore.getCurrentId())) {
+        /*if (!newRootPost && (!oldRootPost || oldRootPost.user_id !== UserStore.getCurrentId())) {
             setTimeout(PostStore.closeRHS, 100);
-        }
+        }*/
     }
     componentWillUnmount() {
         PostStore.removeSelectedPostChangeListener(this.onChange);
@@ -101,26 +104,26 @@ export default class RhsThread extends React.Component {
             windowHeight: Utils.windowHeight()
         });
     }
-<<<<<<< 48d2f86b90b3e0b02cb28f3e8b6e4d454f9cb869
-    onChange() {
-        var newState = this.getStateFromStores();
-        if (!Utils.areObjectsEqual(newState, this.state)) {
-            this.setState(newState);
-=======
     onSocketChange(msg) {
         if (msg.action === SocketEvents.POST_DELETED) {
             const deletedPost = JSON.parse(msg.props.post);
             const rootPost = this.getRootPost();
 
             // Show the modal if the root post is gone and the deleted post is in fact a root that you didn't delete
-            if (!rootPost && deletedPost && !deletedPost.root_id && deletedPost.user_id !== UserStore.getCurrentId()) {
-                this.handleDeletedPost();
+            if (!rootPost && deletedPost && !deletedPost.root_id) {
+                if (deletedPost.user_id !== UserStore.getCurrentId()) {
+                    this.handleDeletedPost();
+                }
+
+                PostStore.closeRHS();
             }
->>>>>>> Fixed react warnings; RHS now closes when the root post is deleted for other users
         }
     }
     onChange() {
-        this.checkUpdateState();
+        var newState = this.getStateFromStores();
+        if (!Utils.areObjectsEqual(newState, this.state)) {
+            this.setState(newState);
+        }
     }
     onChangeAll() {
         // if something was changed in the channel like adding a

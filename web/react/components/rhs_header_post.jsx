@@ -18,7 +18,7 @@ export default class RhsHeaderPost extends React.Component {
     handleClose(e) {
         e.preventDefault();
 
-        PostStore.closeRHS();
+        PostStore.closeRHS(false, true);
     }
     handleBack(e) {
         e.preventDefault();

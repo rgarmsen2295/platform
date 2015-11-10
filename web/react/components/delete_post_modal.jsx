@@ -50,7 +50,7 @@ export default class DeletePostModal extends React.Component {
                 if (selectedList && selectedList.order && selectedList.order.length > 0) {
                     var selectedPost = selectedList.posts[selectedList.order[0]];
                     if ((selectedPost.id === this.state.post.id && !this.state.root_id) || selectedPost.root_id === this.state.post.id) {
-                        PostStore.closeRHS();
+                        PostStore.closeRHS(false, true);
                     } else if (selectedPost.id === this.state.post.id && this.state.root_id) {
                         if (selectedPost.root_id && selectedPost.root_id.length > 0 && selectedList.posts[selectedPost.root_id]) {
                             selectedList.order = [selectedPost.root_id];
