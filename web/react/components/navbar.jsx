@@ -14,6 +14,7 @@ const ToggleModalButton = require('./toggle_modal_button.jsx');
 const UserStore = require('../stores/user_store.jsx');
 const ChannelStore = require('../stores/channel_store.jsx');
 const TeamStore = require('../stores/team_store.jsx');
+const PostStore = require('../stores/post_store.jsx');
 
 const Client = require('../utils/client.jsx');
 const AsyncClient = require('../utils/async_client.jsx');
@@ -74,7 +75,7 @@ export default class Navbar extends React.Component {
     hideSidebars(e) {
         var windowWidth = $(window).outerWidth();
         if (windowWidth <= 768) {
-            AppDispatcher.handleServerAction({
+            /*AppDispatcher.handleServerAction({
                 type: ActionTypes.RECIEVED_SEARCH,
                 results: null
             });
@@ -82,7 +83,8 @@ export default class Navbar extends React.Component {
             AppDispatcher.handleServerAction({
                 type: ActionTypes.RECIEVED_POST_SELECTED,
                 results: null
-            });
+            });*/
+            PostStore.closeRHS();
 
             if (e.target.className !== 'navbar-toggle' && e.target.className !== 'icon-bar') {
                 $('.inner__wrap').removeClass('move--right move--left move--left-small');

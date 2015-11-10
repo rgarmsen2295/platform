@@ -4,6 +4,7 @@
 var client = require('../utils/client.jsx');
 var AsyncClient = require('../utils/async_client.jsx');
 var SearchStore = require('../stores/search_store.jsx');
+var PostStore = require('../stores/post_store.jsx');
 var AppDispatcher = require('../dispatcher/app_dispatcher.jsx');
 var utils = require('../utils/utils.jsx');
 var Constants = require('../utils/constants.jsx');
@@ -60,22 +61,7 @@ export default class SearchBar extends React.Component {
     handleClose(e) {
         e.preventDefault();
 
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH,
-            results: null
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH_TERM,
-            term: null,
-            do_search: false,
-            is_mention_search: false
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_POST_SELECTED,
-            results: null
-        });
+        PostStore.closeRHS();
     }
     handleKeyDown(e) {
         if (this.refs.autocomplete) {

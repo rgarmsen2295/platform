@@ -1,6 +1,7 @@
 // Copyright (c) 2015 Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
+const PostStore = require('../stores/post_store.jsx');
 const AppDispatcher = require('../dispatcher/app_dispatcher.jsx');
 const Constants = require('../utils/constants.jsx');
 const ActionTypes = Constants.ActionTypes;
@@ -17,15 +18,7 @@ export default class RhsHeaderPost extends React.Component {
     handleClose(e) {
         e.preventDefault();
 
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH,
-            results: null
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_POST_SELECTED,
-            results: null
-        });
+        PostStore.closeRHS();
     }
     handleBack(e) {
         e.preventDefault();
