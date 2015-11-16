@@ -36,23 +36,42 @@ export default class RhsThread extends React.Component {
         this.state = state;
     }
     getStateFromStores() {
-        var postList = PostStore.getSelectedPost();
-        if (!postList || postList.order.length < 1 || !postList.posts[postList.order[0]]) {
+        var selectedList = PostStore.getSelectedPost();
+        if (!selectedList || selectedList.order.length < 1) {
             return {postList: {}};
         }
 
-        var channelId = postList.posts[postList.order[0]].channel_id;
+        // If we have a good post list but a non-existant selected post (was deleted) set it to the root post
+        if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
+            if (this.state && this.state.selectedPost) {
+                const selectedPost = this.state.selectedPost;
+                if (selectedPost.root_id === '') {
+                    selectedList.order = [selectedPost.id];
+                } else {
+                    selectedList.order = [selectedPost.root_id];
+                }
+                PostStore.storeSelectedPost(selectedList);
+            }
+        }
+
+        if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
+            return {postList: {}};
+        }
+
+        var channelId = selectedList.posts[selectedList.order[0]].channel_id;
         var pendingPostsList = PostStore.getPendingPosts(channelId);
 
         if (pendingPostsList) {
             for (var pid in pendingPostsList.posts) {
                 if (pendingPostsList.posts.hasOwnProperty(pid)) {
-                    postList.posts[pid] = pendingPostsList.posts[pid];
+                    selectedList.posts[pid] = pendingPostsList.posts[pid];
                 }
             }
         }
 
-        return {postList: postList};
+        const newSelectedPost = selectedList.posts[selectedList.order[0]];
+
+        return {postList: selectedList, selectedPost: newSelectedPost};
     }
     componentWillMount() {
         // check
@@ -67,18 +86,11 @@ export default class RhsThread extends React.Component {
         window.addEventListener('resize', this.handleResize);
         this.mounted = true;
     }
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate() {
         if ($('.post-right__scroll')[0]) {
             $('.post-right__scroll').scrollTop($('.post-right__scroll')[0].scrollHeight);
         }
         this.resize();
-
-        const oldRootPost = this.getRootPost(prevState.postList);
-        const newRootPost = this.getRootPost(this.state.postList);
-
-        /*if (!newRootPost && (!oldRootPost || oldRootPost.user_id !== UserStore.getCurrentId())) {
-            setTimeout(PostStore.closeRHS, 100);
-        }*/
     }
     componentWillUnmount() {
         PostStore.removeSelectedPostChangeListener(this.onChange);
@@ -107,11 +119,12 @@ export default class RhsThread extends React.Component {
     onSocketChange(msg) {
         if (msg.action === SocketEvents.POST_DELETED) {
             const deletedPost = JSON.parse(msg.props.post);
-            const rootPost = this.getRootPost();
+            const rootPost = this.getRootPost(this.state.postList);
+            const curUserId = UserStore.getCurrentId();
 
             // Show the modal if the root post is gone and the deleted post is in fact a root that you didn't delete
-            if (!rootPost && deletedPost && !deletedPost.root_id) {
-                if (deletedPost.user_id !== UserStore.getCurrentId()) {
+            if (this.mounted && !rootPost && deletedPost && deletedPost.root_id.length === 0) {
+                if (deletedPost.user_id !== curUserId || msg.props.user_id !== curUserId) {
                     this.handleDeletedPost();
                 }
 
@@ -120,10 +133,7 @@ export default class RhsThread extends React.Component {
         }
     }
     onChange() {
-        var newState = this.getStateFromStores();
-        if (!Utils.areObjectsEqual(newState, this.state)) {
-            this.setState(newState);
-        }
+        this.checkUpdateState();
     }
     onChangeAll() {
         // if something was changed in the channel like adding a
@@ -182,6 +192,9 @@ export default class RhsThread extends React.Component {
             rootPost = selectedPost;
         } else {
             rootPost = postList.posts[selectedPost.root_id];
+            if (!rootPost) {
+                rootPost = selectedPost;
+            }
         }
 
         return rootPost;
