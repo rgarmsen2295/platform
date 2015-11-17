@@ -199,10 +199,7 @@ export default class CreatePost extends React.Component {
                 const state = {};
 
                 if (err.message === 'Invalid RootId parameter') {
-                    if ($('#post_deleted').length > 0) {
-                        $('#post_deleted').modal('show');
-                    }
-                    PostStore.removePendingPost(post.pending_post_id);
+                    Utils.closeRHSAndDisplayDialog(post);
                 } else {
                     post.state = Constants.POST_FAILED;
                     PostStore.updatePendingPost(post);

@@ -6,6 +6,7 @@ var ChannelStore = require('../stores/channel_store.jsx');
 var UserStore = require('../stores/user_store.jsx');
 var PreferenceStore = require('../stores/preference_store.jsx');
 var TeamStore = require('../stores/team_store.jsx');
+var PostStore = require('../stores/post_store.jsx');
 var Constants = require('../utils/constants.jsx');
 var ActionTypes = Constants.ActionTypes;
 var Client = require('./client.jsx');
@@ -1240,4 +1241,13 @@ export function getPostTerm(post) {
     }
 
     return postTerm;
+}
+
+export function closeRHSAndDisplayDialog(post) {
+    PostStore.closeRHS();
+    PostStore.removePendingPost(post.channel_id, post.pending_post_id);
+
+    if ($('#post_deleted').length > 0) {
+        $('#post_deleted').modal('show');
+    }
 }

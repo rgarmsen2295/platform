@@ -41,7 +41,7 @@ export default class RhsThread extends React.Component {
             return {postList: {}};
         }
 
-        // If we have a good post list but a non-existant selected post (was deleted) set it to the root post
+        // If we have a good post list but a removed selected post, set the selected post to be the root post
         if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
             if (this.state && this.state.selectedPost) {
                 const selectedPost = this.state.selectedPost;
@@ -74,7 +74,7 @@ export default class RhsThread extends React.Component {
         return {postList: selectedList, selectedPost: newSelectedPost};
     }
     componentWillMount() {
-        // check
+        // check here does not work yet
     }
     componentDidMount() {
         PostStore.addSelectedPostChangeListener(this.onChange);
@@ -123,7 +123,7 @@ export default class RhsThread extends React.Component {
             const curUserId = UserStore.getCurrentId();
 
             // Show the modal if the root post is gone and the deleted post is in fact a root that you didn't delete
-            if (this.mounted && !rootPost && deletedPost && deletedPost.root_id.length === 0) {
+            if (this.mounted && deletedPost && deletedPost.root_id.length === 0 && (!rootPost || rootPost.id === deletedPost.id)) {
                 if (deletedPost.user_id !== curUserId || msg.props.user_id !== curUserId) {
                     this.handleDeletedPost();
                 }
