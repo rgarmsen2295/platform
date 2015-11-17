@@ -45,11 +45,7 @@ export default class RhsThread extends React.Component {
         if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
             if (this.state && this.state.selectedPost) {
                 const selectedPost = this.state.selectedPost;
-                if (selectedPost.root_id === '') {
-                    selectedList.order = [selectedPost.id];
-                } else {
-                    selectedList.order = [selectedPost.root_id];
-                }
+                selectedList.order = [selectedPost.root_id];
                 PostStore.storeSelectedPost(selectedList);
             }
         }
@@ -74,7 +70,11 @@ export default class RhsThread extends React.Component {
         return {postList: selectedList, selectedPost: newSelectedPost};
     }
     componentWillMount() {
-        // check here does not work yet
+        console.log(this.state.postList);
+        console.log(this.state.selectedPost);
+        if (this.state.selectedPost)
+            console.log(PostStore.getPosts(this.state.selectedPost.channel_id));
+        // hmmm...
     }
     componentDidMount() {
         PostStore.addSelectedPostChangeListener(this.onChange);
@@ -100,6 +100,7 @@ export default class RhsThread extends React.Component {
 
         window.removeEventListener('resize', this.handleResize);
         this.mounted = false;
+        this.checkUpdateState();
     }
     forceUpdateInfo() {
         if (this.state.postList) {
