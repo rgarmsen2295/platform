@@ -8,6 +8,7 @@ var Constants = require('../utils/constants.jsx');
 var UserStore = require('../stores/user_store.jsx');
 var PostStore = require('../stores/post_store.jsx');
 var ChannelStore = require('../stores/channel_store.jsx');
+var PreferenceStore = require('../stores/preference_store.jsx');
 var client = require('../utils/client.jsx');
 var AsyncClient = require('../utils/async_client.jsx');
 var ActionTypes = Constants.ActionTypes;
@@ -24,6 +25,12 @@ export default class Post extends React.Component {
         this.retryPost = this.retryPost.bind(this);
 
         this.state = {};
+    }
+    componentDidMount() {
+        PreferenceStore.addChangeListener(this.forceUpdateInfo);
+    }
+    componentWillUnmount() {
+        PreferenceStore.removeChangeListener(this.forceUpdateInfo);
     }
     handleCommentClick(e) {
         e.preventDefault();
