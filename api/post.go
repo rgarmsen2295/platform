@@ -884,6 +884,7 @@ func deletePost(c *Context, w http.ResponseWriter, r *http.Request) {
 
 		message := model.NewMessage(c.Session.TeamId, post.ChannelId, c.Session.UserId, model.ACTION_POST_DELETED)
 		message.Add("post", post.ToJson())
+		message.Add("user_id", c.Session.UserId)
 
 		PublishAndForget(message)
 

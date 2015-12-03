@@ -4,6 +4,7 @@
 import * as client from '../utils/client.jsx';
 import * as AsyncClient from '../utils/async_client.jsx';
 import SearchStore from '../stores/search_store.jsx';
+import PostStore from '../stores/post_store.jsx';
 import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import SuggestionBox from './suggestion/suggestion_box.jsx';
 import SearchChannelProvider from './suggestion/search_channel_provider.jsx';
@@ -63,22 +64,7 @@ export default class SearchBar extends React.Component {
     handleClose(e) {
         e.preventDefault();
 
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH,
-            results: null
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH_TERM,
-            term: null,
-            do_search: false,
-            is_mention_search: false
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_POST_SELECTED,
-            results: null
-        });
+        PostStore.closeRHS();
     }
     handleUserInput(text) {
         var term = text;

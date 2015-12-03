@@ -4,6 +4,8 @@
 import PostStore from '../stores/post_store.jsx';
 import UserStore from '../stores/user_store.jsx';
 import PreferenceStore from '../stores/preference_store.jsx';
+import SocketStore from '../stores/socket_store.jsx';
+
 import * as Utils from '../utils/utils.jsx';
 import SearchBox from './search_bar.jsx';
 import CreateComment from './create_comment.jsx';
@@ -13,14 +15,22 @@ import Comment from './rhs_comment.jsx';
 import Constants from '../utils/constants.jsx';
 import FileUploadOverlay from './file_upload_overlay.jsx';
 
+const SocketEvents = Constants.SocketEvents;
+
 export default class RhsThread extends React.Component {
     constructor(props) {
         super(props);
 
+        this.mounted = false;
+
+        this.onSocketChange = this.onSocketChange.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onChangeAll = this.onChangeAll.bind(this);
         this.forceUpdateInfo = this.forceUpdateInfo.bind(this);
         this.handleResize = this.handleResize.bind(this);
+        this.handleDeletedPost = this.handleDeletedPost.bind(this);
+        this.checkUpdateState = this.checkUpdateState.bind(this);
+        this.getRootPost = this.getRootPost.bind(this);
 
         const state = this.getStateFromStores();
         state.windowWidth = Utils.windowWidth();
@@ -28,30 +38,48 @@ export default class RhsThread extends React.Component {
         this.state = state;
     }
     getStateFromStores() {
-        var postList = PostStore.getSelectedPost();
-        if (!postList || postList.order.length < 1 || !postList.posts[postList.order[0]]) {
+        var selectedList = PostStore.getSelectedPost();
+        if (!selectedList || selectedList.order.length < 1 || !selectedList.posts[selectedList.order[0]]) {
             return {postList: {}};
         }
 
-        var channelId = postList.posts[postList.order[0]].channel_id;
+        // If we have a good post list but a removed selected post, set the selected post to be the root post
+        if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
+            if (this.state && this.state.selectedPost) {
+                const selectedPost = this.state.selectedPost;
+                selectedList.order = [selectedPost.root_id];
+                PostStore.storeSelectedPost(selectedList);
+            }
+        }
+
+        if (selectedList.posts && !selectedList.posts[selectedList.order[0]]) {
+            return {postList: {}};
+        }
+
+        var channelId = selectedList.posts[selectedList.order[0]].channel_id;
         var pendingPostsList = PostStore.getPendingPosts(channelId);
 
         if (pendingPostsList) {
             for (var pid in pendingPostsList.posts) {
                 if (pendingPostsList.posts.hasOwnProperty(pid)) {
-                    postList.posts[pid] = pendingPostsList.posts[pid];
+                    selectedList.posts[pid] = pendingPostsList.posts[pid];
                 }
             }
         }
 
-        return {postList: postList};
+        const newSelectedPost = selectedList.posts[selectedList.order[0]];
+
+        return {postList: selectedList, selectedPost: newSelectedPost};
     }
     componentDidMount() {
         PostStore.addSelectedPostChangeListener(this.onChange);
         PostStore.addChangeListener(this.onChangeAll);
         PreferenceStore.addChangeListener(this.forceUpdateInfo);
+        SocketStore.addChangeListener(this.onSocketChange);
+
         this.resize();
         window.addEventListener('resize', this.handleResize);
+        this.mounted = true;
     }
     componentDidUpdate() {
         if ($('.post-right__scroll')[0]) {
@@ -63,7 +91,12 @@ export default class RhsThread extends React.Component {
         PostStore.removeSelectedPostChangeListener(this.onChange);
         PostStore.removeChangeListener(this.onChangeAll);
         PreferenceStore.removeChangeListener(this.forceUpdateInfo);
+        SocketStore.removeChangeListener(this.onSocketChange);
+
         window.removeEventListener('resize', this.handleResize);
+
+        this.mounted = false;
+        this.checkUpdateState();
     }
     forceUpdateInfo() {
         if (this.state.postList) {
@@ -80,11 +113,24 @@ export default class RhsThread extends React.Component {
             windowHeight: Utils.windowHeight()
         });
     }
-    onChange() {
-        var newState = this.getStateFromStores();
-        if (!Utils.areObjectsEqual(newState, this.state)) {
-            this.setState(newState);
+    onSocketChange(msg) {
+        if (msg.action === SocketEvents.POST_DELETED) {
+            const deletedPost = JSON.parse(msg.props.post);
+            const rootPost = this.getRootPost(this.state.postList);
+            const curUserId = UserStore.getCurrentId();
+
+            // Show the modal if the root post is gone and the deleted post is in fact a root that you didn't delete
+            if (this.mounted && deletedPost && deletedPost.root_id.length === 0 && (!rootPost || rootPost.id === deletedPost.id)) {
+                if (deletedPost.user_id !== curUserId && msg.props.user_id !== curUserId) {
+                    this.handleDeletedPost();
+                }
+
+                PostStore.closeRHS();
+            }
         }
+    }
+    onChange() {
+        this.checkUpdateState();
     }
     onChangeAll() {
         // if something was changed in the channel like adding a
@@ -124,6 +170,12 @@ export default class RhsThread extends React.Component {
             this.setState(newState);
         }
     }
+    checkUpdateState() {
+        var newState = this.getStateFromStores();
+        if (this.mounted && !Utils.areObjectsEqual(newState, this.state)) {
+            this.setState(newState);
+        }
+    }
     resize() {
         $('.post-right__scroll').scrollTop(100000);
         if (this.state.windowWidth > 768) {
@@ -131,13 +183,14 @@ export default class RhsThread extends React.Component {
             $('.post-right__scroll').perfectScrollbar('update');
         }
     }
-    render() {
-        var postList = this.state.postList;
-
+    handleDeletedPost() {
+        if ($('#post_deleted').length > 0) {
+            $('#post_deleted').modal('show');
+        }
+    }
+    getRootPost(postList) {
         if (postList == null || !postList.order) {
-            return (
-                <div></div>
-            );
+            return null;
         }
 
         var selectedPost = postList.posts[postList.order[0]];
@@ -147,18 +200,40 @@ export default class RhsThread extends React.Component {
             rootPost = selectedPost;
         } else {
             rootPost = postList.posts[selectedPost.root_id];
-        }
-
-        var postsArray = [];
-
-        for (var postId in postList.posts) {
-            if (postList.posts.hasOwnProperty(postId)) {
-                var cpost = postList.posts[postId];
-                if (cpost.root_id === rootPost.id) {
-                    postsArray.push(cpost);
-                }
+            if (!rootPost) {
+                rootPost = selectedPost;
             }
         }
+
+        return rootPost;
+    }
+    render() {
+        const postList = this.state.postList;
+        const rootPost = this.getRootPost(postList);
+        const postsArray = [];
+
+        if (postList == null || !postList.order) {
+            return (
+                <div></div>
+            );
+        }
+
+        if (rootPost && rootPost.state !== Constants.POST_DELETED) {
+            for (var postId in postList.posts) {
+                if (postList.posts.hasOwnProperty(postId)) {
+                    var cpost = postList.posts[postId];
+                    if (cpost.root_id === rootPost.id) {
+                        postsArray.push(cpost);
+                    }
+                }
+            }
+        } else {
+            return (
+                <div></div>
+            );
+        }
+
+        const selectedPost = postList.posts[postList.order[0]];
 
         // sort failed posts to bottom, followed by pending, and then regular posts
         postsArray.sort(function postSort(a, b) {

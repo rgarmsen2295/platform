@@ -111,6 +111,16 @@ class SearchStoreClass extends EventEmitter {
         BrowserStore.setItem('search_results', results);
         BrowserStore.setItem('is_mention_search', Boolean(isMentionSearch));
     }
+
+    receivedSearch(results, isMentionSearch) {
+        this.storeSearchResults(results, isMentionSearch);
+        this.emitSearchChange();
+    }
+
+    receivedSearchTerm(term, doSearch, isMentionSearch) {
+        this.storeSearchTerm(term);
+        this.emitSearchTermChange(doSearch, isMentionSearch);
+    }
 }
 
 var SearchStore = new SearchStoreClass();
@@ -120,12 +130,10 @@ SearchStore.dispatchToken = AppDispatcher.register((payload) => {
 
     switch (action.type) {
     case ActionTypes.RECIEVED_SEARCH:
-        SearchStore.storeSearchResults(action.results, action.is_mention_search);
-        SearchStore.emitSearchChange();
+        SearchStore.receivedSearch(action.results, action.is_mention_search);
         break;
     case ActionTypes.RECIEVED_SEARCH_TERM:
-        SearchStore.storeSearchTerm(action.term);
-        SearchStore.emitSearchTermChange(action.do_search, action.is_mention_search);
+        SearchStore.receivedSearchTerm(action.term, action.do_search, action.is_mention_search);
         break;
     case ActionTypes.SHOW_SEARCH:
         SearchStore.emitShowSearch();

@@ -7,6 +7,7 @@ import ChannelStore from '../stores/channel_store.jsx';
 import UserStore from '../stores/user_store.jsx';
 import PreferenceStore from '../stores/preference_store.jsx';
 import TeamStore from '../stores/team_store.jsx';
+import PostStore from '../stores/post_store.jsx';
 import Constants from '../utils/constants.jsx';
 var ActionTypes = Constants.ActionTypes;
 import * as Client from './client.jsx';
@@ -1253,4 +1254,13 @@ export function isFeatureEnabled(feature) {
 
 export function isSystemMessage(post) {
     return post.type && (post.type.lastIndexOf(Constants.SYSTEM_MESSAGE_PREFIX) === 0);
+}
+
+export function closeRHSAndDisplayDialog(post) {
+    PostStore.closeRHS();
+    PostStore.removePendingPost(post.channel_id, post.pending_post_id);
+
+    if ($('#post_deleted').length > 0) {
+        $('#post_deleted').modal('show');
+    }
 }

@@ -7,6 +7,7 @@ import EventEmitter from 'events';
 import ChannelStore from '../stores/channel_store.jsx';
 import BrowserStore from '../stores/browser_store.jsx';
 import UserStore from '../stores/user_store.jsx';
+import SearchStore from '../stores/search_store.jsx';
 
 import Constants from '../utils/constants.jsx';
 const ActionTypes = Constants.ActionTypes;
@@ -90,6 +91,7 @@ class PostStoreClass extends EventEmitter {
         this.getLatestUpdate = this.getLatestUpdate.bind(this);
         this.getCurrentUsersLatestPost = this.getCurrentUsersLatestPost.bind(this);
         this.getCommentCount = this.getCommentCount.bind(this);
+        this.closeRHS = this.closeRHS.bind(this);
 
         this.postsInfo = {};
         this.currentFocusedPostId = null;
@@ -565,6 +567,23 @@ class PostStoreClass extends EventEmitter {
 
         return 0;
     }
+    receiveSelectedPost(postList, fromSearch) {
+        this.storeSelectedPost(postList);
+        this.emitSelectedPostChange(fromSearch);
+    }
+    closeRHS(ignoreSearch, ignoreSearchTerm, ignoreSelectedPost) {
+        if (!ignoreSearch) {
+            SearchStore.receivedSearch(null, false);
+        }
+
+        if (!ignoreSearchTerm) {
+            SearchStore.receivedSearchTerm(null, false, false);
+        }
+
+        if (!ignoreSelectedPost) {
+            this.receiveSelectedPost(null, false);
+        }
+    }
     getCommentCount(post) {
         const posts = this.getAllPosts(post.channel_id).posts;
 
@@ -623,8 +642,7 @@ PostStore.dispatchToken = AppDispatcher.register((payload) => {
         PostStore.emitChange();
         break;
     case ActionTypes.RECIEVED_POST_SELECTED:
-        PostStore.storeSelectedPost(action.post_list);
-        PostStore.emitSelectedPostChange(action.from_search);
+        PostStore.receiveSelectedPost(action.post_list, action.from_search);
         break;
     default:
     }

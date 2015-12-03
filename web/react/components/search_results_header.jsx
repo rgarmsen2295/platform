@@ -1,6 +1,8 @@
 // Copyright (c) 2015 Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
+import PostStore from '../stores/post_store.jsx';
+
 import AppDispatcher from '../dispatcher/app_dispatcher.jsx';
 import Constants from '../utils/constants.jsx';
 var ActionTypes = Constants.ActionTypes;
@@ -11,28 +13,10 @@ export default class SearchResultsHeader extends React.Component {
 
         this.handleClose = this.handleClose.bind(this);
     }
-
     handleClose(e) {
         e.preventDefault();
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH,
-            results: null
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_SEARCH_TERM,
-            term: null,
-            do_search: false,
-            is_mention_search: false
-        });
-
-        AppDispatcher.handleServerAction({
-            type: ActionTypes.RECIEVED_POST_SELECTED,
-            results: null
-        });
+        PostStore.closeRHS();
     }
-
     render() {
         var title = 'Search Results';
 
