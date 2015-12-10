@@ -89,6 +89,7 @@ type EmailSettings struct {
 	RequireEmailVerification bool
 	FeedbackName             string
 	FeedbackEmail            string
+	EmailAttributionNotice   string
 	SMTPUsername             string
 	SMTPPassword             string
 	SMTPServer               string

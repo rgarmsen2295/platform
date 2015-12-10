@@ -56,6 +56,7 @@ export default class EmailSettings extends React.Component {
         config.EmailSettings.RequireEmailVerification = ReactDOM.findDOMNode(this.refs.requireEmailVerification).checked;
         config.EmailSettings.FeedbackName = ReactDOM.findDOMNode(this.refs.feedbackName).value.trim();
         config.EmailSettings.FeedbackEmail = ReactDOM.findDOMNode(this.refs.feedbackEmail).value.trim();
+        config.EmailSettings.EmailAttributionNotice = ReactDOM.findDOMNode(this.refs.emailAttributionNotice).value.trim();
         config.EmailSettings.SMTPServer = ReactDOM.findDOMNode(this.refs.SMTPServer).value.trim();
         config.EmailSettings.PushNotificationServer = ReactDOM.findDOMNode(this.refs.PushNotificationServer).value.trim();
         config.EmailSettings.SMTPPort = ReactDOM.findDOMNode(this.refs.SMTPPort).value.trim();
@@ -334,6 +335,28 @@ export default class EmailSettings extends React.Component {
                                 disabled={!this.state.sendEmailNotifications}
                             />
                             <p className='help-text'>{'Email address displayed on email account used when sending notification emails from Mattermost.'}</p>
+                        </div>
+                    </div>
+
+                    <div className='form-group'>
+                        <label
+                            className='control-label col-sm-4'
+                            htmlFor='emailAttributionNotice'
+                        >
+                            {'Email Attribution Notice:'}
+                        </label>
+                        <div className='col-sm-8'>
+                            <input
+                                type='email'
+                                className='form-control'
+                                id='emailAttributionNotice'
+                                ref='emailAttributionNotice'
+                                placeholder='Ex: "Sent from ABC Inc., 221B Baker Street, London, U.K.'
+                                defaultValue={this.props.config.EmailSettings.FeedbackEmail}
+                                onChange={this.handleChange}
+                                disabled={!this.state.sendEmailNotifications}
+                            />
+                            <p className='help-text'>{'When filled in, this text is added to the bottom of email notifications to let the user know from whom the email was sent.'}</p>
                         </div>
                     </div>
 

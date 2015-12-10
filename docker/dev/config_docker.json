@@ -61,6 +61,7 @@
         "RequireEmailVerification": false,
         "FeedbackName": "",
         "FeedbackEmail": "",
+        "EmailAttributionNotice": "",
         "SMTPUsername": "",
         "SMTPPassword": "",
         "SMTPServer": "",
