@@ -2,6 +2,7 @@
 // See License.txt for license information.
 
 import Constants from '../../utils/constants.jsx';
+import * as Utils from '../../utils/utils.jsx';
 
 export default class CustomThemeChooser extends React.Component {
     constructor(props) {
@@ -60,6 +61,7 @@ export default class CustomThemeChooser extends React.Component {
         Constants.THEME_ELEMENTS.forEach((element, index) => {
             if (element.id === 'codeTheme') {
                 const codeThemeOptions = [];
+                let currentCodeTheme = Constants.DEFAULT_CODE_THEME;
 
                 element.themes.forEach((codeTheme, codeThemeIndex) => {
                     codeThemeOptions.push(
@@ -71,6 +73,13 @@ export default class CustomThemeChooser extends React.Component {
                         </option>
                     );
                 });
+
+                if (Utils.checkCodeThemeExists(theme[element.id])) {
+                    currentCodeTheme = theme[element.id];
+                }
+
+                console.log(theme[element.id]);
+                console.log(Utils.checkCodeThemeExists(theme[element.id]));
 
                 elements.push(
                     <div
@@ -85,14 +94,14 @@ export default class CustomThemeChooser extends React.Component {
                             <select
                                 className='form-control'
                                 type='text'
-                                defaultValue={theme[element.id]}
+                                defaultValue={currentCodeTheme}
                                 onChange={this.onInputChange}
                             >
                                 {codeThemeOptions}
                             </select>
                             <span className='input-group-addon'>
                                 <img
-                                    src={'/static/images/themes/code_themes/' + theme[element.id] + '.png'}
+                                    src={'/static/images/themes/code_themes/' + currentCodeTheme + '.png'}
                                 />
                             </span>
                         </div>

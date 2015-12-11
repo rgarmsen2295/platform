@@ -698,7 +698,10 @@ export function applyTheme(theme) {
     if (!theme.codeTheme) {
         theme.codeTheme = Constants.DEFAULT_CODE_THEME;
     }
-    updateCodeTheme(theme.codeTheme);
+
+    if (checkCodeThemeExists(theme.codeTheme)) {
+        updateCodeTheme(theme.codeTheme);
+    }
 }
 
 export function applyFont(fontName) {
@@ -768,6 +771,22 @@ export function updateCodeTheme(theme) {
         };
         xmlHTTP.send();
     }
+}
+
+export function checkCodeThemeExists(theme) {
+    let exists = false;
+
+    Constants.THEME_ELEMENTS.forEach((element) => {
+        if (element.id === 'codeTheme') {
+            element.themes.forEach((codeTheme) => {
+                if (codeTheme.id === theme) {
+                    exists = true;
+                }
+            });
+        }
+    });
+
+    return exists;
 }
 
 export function placeCaretAtEnd(el) {
