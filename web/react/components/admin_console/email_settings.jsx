@@ -351,8 +351,8 @@ export default class EmailSettings extends React.Component {
                                 className='form-control'
                                 id='emailAttributionNotice'
                                 ref='emailAttributionNotice'
-                                placeholder='Ex: "Sent from ABC Inc., 221B Baker Street, London, U.K.'
-                                defaultValue={this.props.config.EmailSettings.FeedbackEmail}
+                                placeholder='Ex: "Sent from ABC Inc., 221B Baker Street, London, U.K."'
+                                defaultValue={this.props.config.EmailSettings.EmailAttributionNotice}
                                 onChange={this.handleChange}
                                 disabled={!this.state.sendEmailNotifications}
                             />
