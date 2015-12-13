@@ -79,25 +79,29 @@ export default class UserSettingsAppearance extends React.Component {
         var user = UserStore.getCurrentUser();
         user.theme_props = this.state.theme;
 
-        Client.updateUser(user,
-            (data) => {
-                AppDispatcher.handleServerAction({
-                    type: ActionTypes.RECIEVED_ME,
-                    me: data
-                });
+        if (Utils.checkCodeThemeExists(user.theme_props.codeTheme)) {
+            Client.updateUser(user,
+                (data) => {
+                    AppDispatcher.handleServerAction({
+                        type: ActionTypes.RECIEVED_ME,
+                        me: data
+                    });
 
-                this.props.setRequireConfirm(false);
-                this.originalTheme = Object.assign({}, this.state.theme);
+                    this.props.setRequireConfirm(false);
+                    this.originalTheme = Object.assign({}, this.state.theme);
 
-                $('.ps-container.modal-body').scrollTop(0);
-                $('.ps-container.modal-body').perfectScrollbar('update');
-            },
-            (err) => {
-                var state = this.getStateFromStores();
-                state.serverError = err;
-                this.setState(state);
-            }
-        );
+                    $('.ps-container.modal-body').scrollTop(0);
+                    $('.ps-container.modal-body').perfectScrollbar('update');
+                },
+                (err) => {
+                    var state = this.getStateFromStores();
+                    state.serverError = err;
+                    this.setState(state);
+                }
+            );
+        } else {
+            this.setState({serverError: 'Cannot save theme, unsupported code theme provided'});
+        }
     }
     updateTheme(theme) {
         let themeChanged = this.state.theme.length === theme.length;
@@ -145,7 +149,7 @@ export default class UserSettingsAppearance extends React.Component {
     render() {
         var serverError;
         if (this.state.serverError) {
-            serverError = this.state.serverError;
+            serverError = (<div className='form-group'><br /><label className='col-sm-12 has-error'>{this.state.serverError}</label></div>);
         }
 
         const displayCustom = this.state.type === 'custom';
@@ -193,8 +197,8 @@ export default class UserSettingsAppearance extends React.Component {
                         <br/>
                     </div>
                     {custom}
-                    <hr />
                     {serverError}
+                    <hr />
                     <a
                         className='btn btn-sm btn-primary'
                         href='#'

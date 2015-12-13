@@ -78,9 +78,6 @@ export default class CustomThemeChooser extends React.Component {
                     currentCodeTheme = theme[element.id];
                 }
 
-                console.log(theme[element.id]);
-                console.log(Utils.checkCodeThemeExists(theme[element.id]));
-
                 elements.push(
                     <div
                         className='col-sm-4 form-group'
