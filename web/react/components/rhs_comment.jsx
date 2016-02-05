@@ -229,6 +229,7 @@ class RhsComment extends React.Component {
                     filenames={post.filenames}
                     channelId={post.channel_id}
                     userId={post.user_id}
+                    postId={post.id}
                 />
             );
         }

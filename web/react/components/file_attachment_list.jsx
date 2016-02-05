@@ -58,5 +58,8 @@ FileAttachmentList.propTypes = {
     channelId: React.PropTypes.string,
 
     // the user that owns the post that this is attached to
-    userId: React.PropTypes.string
+    userId: React.PropTypes.string,
+
+    // the post that this is attached to
+    postId: React.PropTypes.string
 };

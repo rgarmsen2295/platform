@@ -376,12 +376,19 @@ func getFile(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	postId := params["postId"]
+	if len(postId) == 0 {
+		c.SetInvalidParam("getFile", "post_id")
+		return
+	}
+
 	hash := r.URL.Query().Get("h")
 	data := r.URL.Query().Get("d")
 	teamId := r.URL.Query().Get("t")
 	isDownload := r.URL.Query().Get("download") == "1"
 
 	cchan := Srv.Store.Channel().CheckPermissionsTo(c.Session.TeamId, channelId, c.Session.UserId)
+	pchan := Srv.Store.Post().Get(postId)
 
 	path := ""
 	if len(teamId) == 26 {
@@ -399,6 +406,11 @@ func getFile(c *Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if !c.HasPermissionsToChannel(cchan, "getFile") {
+		return
+	}
+
+	if result := <-pchan; result.Err != nil {
+		c.Err = result.Err
 		return
 	}
 
@@ -472,6 +484,7 @@ func getPublicLink(c *Context, w http.ResponseWriter, r *http.Request) {
 	channelId := matches[0][1]
 	userId := matches[0][2]
 	filename = matches[0][3]
+	postId := matches[0][4]
 
 	cchan := Srv.Store.Channel().CheckPermissionsTo(c.Session.TeamId, channelId, c.Session.UserId)
 
@@ -481,7 +494,7 @@ func getPublicLink(c *Context, w http.ResponseWriter, r *http.Request) {
 	data := model.MapToJson(newProps)
 	hash := model.HashPassword(fmt.Sprintf("%v:%v", data, utils.Cfg.FileSettings.PublicLinkSalt))
 
-	url := fmt.Sprintf("%s/api/v1/files/get/%s/%s/%s?d=%s&h=%s&t=%s", c.GetSiteURL(), channelId, userId, filename, url.QueryEscape(data), url.QueryEscape(hash), c.Session.TeamId)
+	url := fmt.Sprintf("%s/api/v1/files/get/%s/%s/%s?d=%s&h=%s&t=%s", c.GetSiteURL(), channelId, userId, filename, postId, url.QueryEscape(data), url.QueryEscape(hash), c.Session.TeamId)
 
 	if !c.HasPermissionsToChannel(cchan, "getPublicLink") {
 		return

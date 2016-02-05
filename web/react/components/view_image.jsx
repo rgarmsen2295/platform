@@ -194,6 +194,7 @@ class ViewImageModal extends React.Component {
         data.channel_id = this.props.channelId;
         data.user_id = this.props.userId;
         data.filename = this.props.filenames[this.state.imgId];
+        data.post_id = this.props.postId;
         Client.getPublicLink(
             data,
             (serverData) => {
@@ -349,7 +350,8 @@ ViewImageModal.defaultProps = {
     filenames: [],
     channelId: '',
     userId: '',
-    startId: 0
+    startId: 0,
+    postId: ''
 };
 ViewImageModal.propTypes = {
     intl: intlShape.isRequired,
@@ -359,7 +361,8 @@ ViewImageModal.propTypes = {
     modalId: React.PropTypes.string,
     channelId: React.PropTypes.string,
     userId: React.PropTypes.string,
-    startId: React.PropTypes.number
+    startId: React.PropTypes.number,
+    postId: React.PropTypes.string
 };
 
 function LoadingImagePreview({progress, loading}) {

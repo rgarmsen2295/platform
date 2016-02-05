@@ -307,6 +307,7 @@ class PostBody extends React.Component {
                     filenames={filenames}
                     channelId={post.channel_id}
                     userId={post.user_id}
+                    postId={post.id}
                 />
             );
         }
