@@ -605,13 +605,13 @@ export function splitFileLocation(fileLocation) {
     return {ext: ext, name: filename, path: filePath};
 }
 
-export function getPreviewImagePath(filename) {
+export function getPreviewImagePath(filename, postId) {
     // Returns the path to a preview image that can be used to represent a file.
     const fileInfo = splitFileLocation(filename);
     const fileType = getFileType(fileInfo.ext);
 
     if (fileType === 'image') {
-        return getFileUrl(fileInfo.path + '_preview.jpg');
+        return getFileUrl(fileInfo.path + '_preview.jpg', postId);
     }
 
     // only images have proper previews, so just use a placeholder icon for non-images
@@ -1145,9 +1145,10 @@ export function fileSizeToString(bytes) {
 }
 
 // Converts a filename (like those attached to Post objects) to a url that can be used to retrieve attachments from the server.
-export function getFileUrl(filename, isDownload) {
+export function getFileUrl(filename, postId, isDownload) {
     const downloadParam = isDownload ? '&download=1' : '';
-    return getWindowLocationOrigin() + '/api/v1/files/get' + filename + '?' + getSessionIndex() + downloadParam;
+    const postIdParam = '&post_id=' + postId;
+    return getWindowLocationOrigin() + '/api/v1/files/get' + filename + '?' + getSessionIndex() + downloadParam + postIdParam;
 }
 
 // Gets the name of a file (including extension) from a given url or file path.

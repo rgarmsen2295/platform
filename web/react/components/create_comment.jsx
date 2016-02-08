@@ -353,6 +353,7 @@ class CreateComment extends React.Component {
                     files={this.state.previews}
                     onRemove={this.removePreview}
                     uploadsInProgress={this.state.uploadsInProgress}
+                    postId={0}
                 />
             );
         }

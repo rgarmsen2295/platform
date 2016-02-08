@@ -35,7 +35,7 @@ export default class FilePreview extends React.Component {
             var ext = filenameSplit[filenameSplit.length - 1];
             var type = Utils.getFileType(ext);
 
-            filename = Utils.getFileUrl(filename);
+            filename = Utils.getFileUrl(filename, this.props.postId);
 
             if (type === 'image') {
                 previews.push(
@@ -107,10 +107,12 @@ export default class FilePreview extends React.Component {
 
 FilePreview.defaultProps = {
     files: [],
-    uploadsInProgress: []
+    uploadsInProgress: [],
+    postId: ''
 };
 FilePreview.propTypes = {
     onRemove: React.PropTypes.func.isRequired,
     files: React.PropTypes.array,
-    uploadsInProgress: React.PropTypes.array
+    uploadsInProgress: React.PropTypes.array,
+    postId: React.PropTypes.string
 };

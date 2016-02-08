@@ -97,7 +97,7 @@ class FileAttachment extends React.Component {
     }
     playGif(e, filename) {
         var img = new Image();
-        var fileUrl = utils.getFileUrl(filename);
+        var fileUrl = utils.getFileUrl(filename, this.props.postId);
 
         this.setState({loading: true});
         img.load(fileUrl);
@@ -164,7 +164,7 @@ class FileAttachment extends React.Component {
         var filename = this.props.filename;
 
         var fileInfo = utils.splitFileLocation(filename);
-        var fileUrl = utils.getFileUrl(filename);
+        var fileUrl = utils.getFileUrl(filename, this.props.postId);
         var type = utils.getFileType(fileInfo.ext);
 
         var playbackControls = '';
@@ -309,7 +309,10 @@ FileAttachment.propTypes = {
     index: React.PropTypes.number.isRequired,
 
     // handler for when the thumbnail is clicked passed the index above
-    handleImageClick: React.PropTypes.func
+    handleImageClick: React.PropTypes.func,
+
+    // the post that this is attached to
+    postId: React.PropTypes.string.isRequired
 };
 
 export default injectIntl(FileAttachment);

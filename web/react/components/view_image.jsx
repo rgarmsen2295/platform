@@ -164,7 +164,7 @@ class ViewImageModal extends React.Component {
                 previewUrl = Utils.getPreviewImagePath(filename);
             } else {
                 // some images (eg animated gifs) just show the file itself and not a preview
-                previewUrl = Utils.getFileUrl(filename);
+                previewUrl = Utils.getFileUrl(filename, this.props.postId);
             }
 
             const img = new Image();
@@ -222,7 +222,7 @@ class ViewImageModal extends React.Component {
         }
 
         const filename = this.props.filenames[this.state.imgId];
-        const fileUrl = Utils.getFileUrl(filename, true);
+        const fileUrl = Utils.getFileUrl(filename, this.props.postId, true);
 
         var content;
         if (this.state.loaded[this.state.imgId]) {

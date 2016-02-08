@@ -27,6 +27,7 @@ export default class FileAttachmentList extends React.Component {
                     filename={filenames[i]}
                     index={i}
                     handleImageClick={this.handleImageClick}
+                    postId={this.props.postId}
                 />
             );
         }
