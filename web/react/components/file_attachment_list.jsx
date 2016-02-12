@@ -44,6 +44,7 @@ export default class FileAttachmentList extends React.Component {
                     userId={this.props.userId}
                     startId={this.state.startImgId}
                     filenames={filenames}
+                    postId={this.props.postId}
                 />
             </div>
         );
