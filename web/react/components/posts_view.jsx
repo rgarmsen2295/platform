@@ -209,13 +209,11 @@ export default class PostsView extends React.Component {
                 //     the previous post was made by the same user as the current post,
                 //     the previous post is not a comment,
                 //     the current post is not a comment,
-                //     the previous post and current post are both from webhooks or both not,
-                //     the previous post and current post have the same webhook usernames
+                //     the current post is not from a webhook
                 if (prevPostUserId === postUserId &&
                         !prevPostIsComment &&
                         !postIsComment &&
-                        postFromWebhook === prevPostFromWebhook &&
-                        prevWebhookName === curWebhookName) {
+                        !postFromWebhook) {
                     hideProfilePic = true;
                 }
             }
